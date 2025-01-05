@@ -1,4 +1,6 @@
 from datetime import datetime
+import mensajes as msj
+
 def insert_inventario(db):
     codigoProd = input("Código del producto: ")
     stock = input("Stock del producto: ")
@@ -80,14 +82,7 @@ def eliminar_inventario(db):
 
 def menu_crud_inventario(db):
     while True:
-        print("""
-        === Gestión de Inventario - Santa Birra===
-        1. Insertar Inventario
-        2. Consultar Inventario
-        3. Actualizar Inventario
-        4. Eliminar Inventario
-        5. Volver
-        """)
+        print(msj.opcionesInventario)
         opcion = input("Seleccione una opción: ")
         
         if opcion == "1":
@@ -106,4 +101,4 @@ def menu_crud_inventario(db):
             break
 
         else:
-            print("Opción no válida.")
+            print(msj.opcionesError)
