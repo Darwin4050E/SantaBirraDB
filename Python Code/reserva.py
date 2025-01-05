@@ -87,7 +87,57 @@ def consultar_reserva(db):
 def actualizar_reserva(db):
     conection = db.cursor()
     reserva_id = input("Ingrese el ID de la reserva que desea modificar: ")
+    while True:
+        print(f"""
+        === Actualizar Reserva {reserva_id} - Santa Birra ===
+        1. Actualizar Fecha
+        2. Actualizar Zona
+        3. Actualizar Estado
+        4. Actualizar Promoción
+        5. Volver
+        """)
+        opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            actualizar_fecha(conection,reserva_id)
+        elif opcion == "2":
+            actualizar_zona(conection,reserva_id)
+        elif opcion == "3":
+            actualizar_estado(conection,reserva_id)
+        elif opcion == "4":
+            actualizar_promocion(conection,reserva_id)
+        elif opcion == "5":
+            break
+        else:
+            print("Opción no válida.")
 
+def actualizar_fecha(conection,reserva_id):
+    fecha = input("Ingrese la nueva fecha de la reserva (YYYY-MM-DD): ")
+    nueva_fecha = datetime.strptime(fecha, "%Y-%m-%D").date()
+    query = "UPDATE BOOKING SET Boo_Date=%s WHERE Boo_ID=%s"
+    values = (nueva_fecha, reserva_id)
+    conection.execute(query, values)
+    conection.commit()
+
+def actualizar_zona(conection, reserva_id):
+    zona = input("Ingrese el ID de la zona nueva de la reserva: ")
+    query = "UPDATE BOOKING_ZONE SET Zon_ID=%s WHERE Boo_ID=%s"
+    values = (zona, reserva_id)
+    conection.execute(query, values)
+    conection.commit()
+
+def actualizar_estado(conection, reserva_id):
+    estado = input("Ingrese el ID del estado nuevo de la reserva: ")
+    query = "UPDATE BOOKING SET Sta_ID=%s WHERE Boo_ID=%s"
+    values = (estado, reserva_id)
+    conection.execute(query, values)
+    conection.commit()
+
+def actualizar_promocion(conection, reserva_id):
+    promocion = input("Ingrese el ID de la promoción nueva de la reserva: ")
+    query = "UPDATE BOOKING SET Prom_ID=%s WHERE Boo_ID=%s"
+    values = (promocion, reserva_id)
+    conection.execute(query, values)
+    conection.commit()
 
 def eliminar_reserva(db):
     conection = db.cursor()
