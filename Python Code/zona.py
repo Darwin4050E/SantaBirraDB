@@ -1,3 +1,5 @@
+import mensajes as msj
+
 def consultar_zonas(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM ZONE")
@@ -54,14 +56,7 @@ def actualizar_zona(db):
 
 def menu_crud_zonas(db):
     while True:
-        print("""
-        === Gestión de Zonas - Santa Birra===
-        1. Insertar Zona
-        2. Consultar Zonas
-        3. Actualizar Zona
-        4. Eliminar Zona
-        5. Volver
-        """)
+        print(msj.opcionesZona)
         opcion = input("Seleccione una opción: ")
         
         if opcion == "1":
@@ -80,4 +75,4 @@ def menu_crud_zonas(db):
             break
 
         else:
-            print("Opción no válida.")
+            print(msj.opcionesError)

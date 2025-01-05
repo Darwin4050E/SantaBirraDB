@@ -85,7 +85,61 @@ opcionesVenta = """
     ==========================================
 """
 
-opcionesError = """"Opción no válida."""
+opcionesZona = """
+    ==========================================
+                Gestión de Zonas
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Zona.
+        2. Consultar Zonas.
+        3. Modificar Zona.
+        4. Eliminar Zona.
+        5. Volver.
+    ==========================================
+"""
+
+opcionesPromocion = """
+    ==========================================
+                Gestión de Promociones
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Promoción.
+        2. Consultar Promociones.
+        3. Modificar Promoción.
+        4. Eliminar Promoción.
+        5. Volver.
+    ==========================================
+"""
+
+opcionesInventario = """
+    ==========================================
+                Gestión de Inventarios
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Inventario.
+        2. Consultar Inventarios.
+        3. Modificar Inventario.
+        4. Eliminar Inventario.
+        5. Volver.
+    ==========================================
+"""
+
+opcionesPago = """
+    ==========================================
+                Gestión de Pagos
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Pagos.
+        2. Consultar Pagos.
+        3. Modificar Pago.
+        4. Eliminar Pago.
+        5. Volver.
+    ==========================================
+"""
+
+
+
+opcionesError = """Opción no válida."""
 
 rendimientoEventos = """
     ==========================================

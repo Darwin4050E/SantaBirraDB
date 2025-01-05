@@ -7,7 +7,8 @@ from ventas import *
 from proveedores import *
 from zona import *
 from promociones import *
-
+from pagos import *
+from inventario import *
 
 import mensajes as msj
 

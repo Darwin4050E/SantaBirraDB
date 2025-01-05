@@ -1,3 +1,5 @@
+import mensajes as msj
+
 def insert_promociones(db):
     nombrePromocion = input("Nombre de la promoción: ")
     descuento = input("Descuento asociado a la promoción (0.xx): ")
@@ -53,14 +55,7 @@ def eliminar_promocion(db):
 
 def menu_crud_promociones(db):
     while True:
-        print("""
-        === Gestión de Inventario - Santa Birra===
-        1. Insertar Promoción
-        2. Consultar Promociones
-        3. Actualizar Promoción
-        4. Eliminar Promoción
-        5. Volver
-        """)
+        print(msj.opcionesPromocion)
         opcion = input("Seleccione una opción: ")
         
         if opcion == "1":
@@ -79,4 +74,4 @@ def menu_crud_promociones(db):
             break
 
         else:
-            print("Opción no válida.")
+            print(msj.opcionesError)
