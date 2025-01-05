@@ -5,11 +5,19 @@ opcionesMenu = """
     Seleccione una opción:
         1. Gestión de Clientes.
         2. Gestión de Productos.
-        3. Gestión de Proveedores
-        3. Gestión de Reservas.
-        4. Gestión de Ventas.
-        5. Generar Reportes.
-        6. Salir.
+        3. Gestión de Proveedores.
+        4. Gestión de Compras.
+        5. Gestión de Empleados.
+        6. Gestión de Ventas.
+        7. Gestión de Inventario.
+        8. Gestión de Reservas.
+        9. Gestión de Promociones.
+        10. Gestión de Pagos.
+        11. Gestión de Zonas.
+        12. Gestión de Incidentes.
+        13. Gestión de Objetos Perdidos.
+        14. Generar Reportes.
+        15. Salir.
     ==========================================
 """
 
