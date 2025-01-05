@@ -5,11 +5,11 @@ from productos import *
 from reportes import *
 from ventas import *
 from proveedores import *
+from zona import *
+from promociones import *
 
 
 import mensajes as msj
-
-
 
 
 def menu_principal(db):
