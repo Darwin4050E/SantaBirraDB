@@ -1,0 +1,22 @@
+# Excluir la carpeta del entorno virtual (env)
+env/
+
+# Excluir el archivo .env
+.env
+
+# Archivos de configuración de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Archivos de logs
+*.log
+
+# Configuraciones específicas del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuración de IDEs comunes
+.vscode/
+.idea/
+*.swp
