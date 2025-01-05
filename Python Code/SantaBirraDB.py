@@ -9,6 +9,8 @@ from zona import *
 from promociones import *
 from pagos import *
 from inventario import *
+from objetosPerdidos import *
+from incidente import *
 
 import mensajes as msj
 

@@ -136,7 +136,34 @@ opcionesPago = """
         5. Volver.
     ==========================================
 """
+opcionesObjetoPerdido = """
+    ==========================================
+            Gestión de Objetos Perdidos
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Objeto.
+        2. Consultar Objetos Perdidos.
+        3. Modificar Objeto Perdido.
+        4. Eliminar Objeto.
+        5. Volver.
+    ==========================================
+"""
 
+opcionesIncidentes = """
+    ==========================================
+                Gestión de Incidentes
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Incidente.
+        2. Agregar Clientes a Incidente.
+        3. Consultar Tipos de Incidente.
+        4. Consultar Incidentes Ocurridos.
+        5. Modificar Incidente.
+        6. Eliminar Incidente.
+        7. Eliminar Cliente de Incidente.
+        8. Volver.
+    ==========================================
+"""
 
 
 opcionesError = """Opción no válida."""
