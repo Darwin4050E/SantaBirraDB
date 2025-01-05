@@ -117,6 +117,7 @@ def actualizar_fecha(conection,reserva_id):
     values = (nueva_fecha, reserva_id)
     conection.execute(query, values)
     conection.commit()
+    print("Fecha actualizada!")
 
 def actualizar_zona(conection, reserva_id):
     zona = input("Ingrese el ID de la zona nueva de la reserva: ")
@@ -124,6 +125,7 @@ def actualizar_zona(conection, reserva_id):
     values = (zona, reserva_id)
     conection.execute(query, values)
     conection.commit()
+    print("Zona actualizada!")
 
 def actualizar_estado(conection, reserva_id):
     estado = input("Ingrese el ID del estado nuevo de la reserva: ")
@@ -131,6 +133,7 @@ def actualizar_estado(conection, reserva_id):
     values = (estado, reserva_id)
     conection.execute(query, values)
     conection.commit()
+    print("Estado actualizado!")
 
 def actualizar_promocion(conection, reserva_id):
     promocion = input("Ingrese el ID de la promoción nueva de la reserva: ")
@@ -138,6 +141,7 @@ def actualizar_promocion(conection, reserva_id):
     values = (promocion, reserva_id)
     conection.execute(query, values)
     conection.commit()
+    print("Promoción actualizada!")
 
 def eliminar_reserva(db):
     conection = db.cursor()
