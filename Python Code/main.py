@@ -6,10 +6,10 @@ import os
 dv.load_dotenv()
 
 connection = mysql.connect(
-    host = os.getenv('MySqlHost'),
-    user = os.getenv('MySqlUser'),
-    password = os.getenv('MySqlPassword'),
-    database = os.getenv('MySqlDatabase')
+    host = os.getenv('MYSQL_HOST'),
+    user = os.getenv('MYSQL_USER'),
+    password = os.getenv('MYSQL_PASS'),
+    database = os.getenv('MYSQL_DB')
 )
 
 fc.menu_principal(connection)

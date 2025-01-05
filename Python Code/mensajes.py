@@ -5,6 +5,7 @@ opcionesMenu = """
     Seleccione una opción:
         1. Gestión de Clientes.
         2. Gestión de Productos.
+        3. Gestión de Proveedores
         3. Gestión de Reservas.
         4. Gestión de Ventas.
         5. Generar Reportes.
@@ -21,6 +22,19 @@ opcionesCliente = """
         2. Consultar Clientes.
         3. Actualizar Cliente.
         4. Eliminar Cliente.
+        5. Volver.
+    ==========================================
+"""
+
+opcionesProveedor = """
+    ==========================================
+               Gestión de proveedores
+    ==========================================
+    Seleccione una opción: 
+        1. Insertar Proveedor.
+        2. Consultar Proveedores.
+        3. Actualizar Proveedor.
+        4. Eliminar Proveedor.
         5. Volver.
     ==========================================
 """
