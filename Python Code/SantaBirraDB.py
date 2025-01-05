@@ -10,6 +10,8 @@ from promociones import *
 from pagos import *
 from inventario import *
 from reserva import *
+from objetosPerdidos import *
+from incidente import *
 
 import mensajes as msj
 
