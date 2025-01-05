@@ -1,7 +1,9 @@
 def insertar_reserva(db):
     conection = db.cursor()
-    fecha = input("Por favor ingresa la fecha de la reserva (YYYY-MM-DD): ")
-    hora = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
+    fechaIngresada = input("Por favor ingresa la fecha de la reserva (YYYY-MM-DD): ")
+    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%D").date()
+    horaIngresada = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
+    hora = datetime.strptime(horaIngresada, "%H:%M:%S").time()
     cliente = input("Ingrese el ID del cliente que realizó la reserva: ")
     promotor = input("Por favor ingrese el ID del promotor del evento: ")
     promocion = input("Por favor ingrese el ID de la promoción: ")
@@ -20,8 +22,8 @@ def consultar_reserva(db):
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
-        fecha = fila[1]
-        hora = fila[2]
+        fecha = fila[1].strftime("%Y/%m/%D")
+        hora = fila[2].strftime("%H:%M:%S")
         cliente_id = fila[3]
         promotor_id = fila[4]
         promocion_id = fila[5]
@@ -30,7 +32,9 @@ def consultar_reserva(db):
         print(f"(Num. Reserva: {id_reserva}, Fecha: {fecha}, Hora: {hora}, ID Cliente: {cliente_id}, ID Promotor: {promotor_id}, ID Promocion: {promocion_id}, ID Evento: {evento_id}, ID Estado: {estado_id})")
 
 def actualizar_reserva(db):
-    print(":D")
+    conection = db.cursor()
+    reserva_id = input("Ingrese el ID de la reserva que desea modificar: ")
+
 
 def eliminar_reserva(db):
     conection = db.cursor()
