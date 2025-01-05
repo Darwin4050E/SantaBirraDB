@@ -1,9 +1,12 @@
 import mensajes as msj
+import clientes
 
 def insertar_venta(db):
     conection = db.cursor()
     fecha = input("Por favor ingresa la fecha de la venta (YYYY-MM-DD): ")
+
     miembro = input("Ingresa el ID del vendedor: ")
+    clientes.consultar_clientes(db)
     cliente = input("Ingresa la cedula del comprador")
     tupla = (fecha, miembro, cliente)
 
