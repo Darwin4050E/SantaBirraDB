@@ -47,6 +47,19 @@ opcionesProveedor = """
     ==========================================
 """
 
+opcionesEmpleado = """
+    ==========================================
+               Gestión de empleados
+    ==========================================
+    Seleccione una opción: 
+        1. Insertar Empleado.
+        2. Consultar Empleados.
+        3. Actualizar Empleado.
+        4. Eliminar Empleado.
+        5. Volver.
+    ==========================================
+"""
+
 opcionesProducto = """
     ==========================================
                Gestión de productos

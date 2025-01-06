@@ -5,6 +5,7 @@ from productos import *
 from reportes import *
 from ventas import *
 from proveedores import *
+from miembros import *
 
 
 import mensajes as msj
