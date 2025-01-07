@@ -75,7 +75,7 @@ def eliminarCompra(db):
     finally:
         cursor.close()
 
-def menu_crud_ventas(db):
+def menu_crud_compras(db):
     while True:
         print(msj.opcionesCompra)
         opcion = int(input("Seleccione una opción [1-4]: "))

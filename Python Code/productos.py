@@ -12,6 +12,24 @@ def insert_producto(db):
     db.commit()
     print("Producto agregado con éxito.")
 
+def consultar_productos_ex(db, ids):
+    conection = db.cursor()
+    ids =(ids)
+    if len(ids) == 1:
+         query = "SELECT * FROM PRODUCT WHERE Pro_code != %s"
+         conection.execute(query, (ids[0],))  # Pasamos el solo valor como tupla
+    else:
+        query = "SELECT * FROM PRODUCT WHERE Pro_code NOT IN (%s)" % ','.join(['%s'] * len(ids))
+        conection.execute(query, tuple(ids))
+    datos = conection.fetchall()
+    for fila in datos:
+        id_producto = fila[0]
+        nombre = fila[1]
+        precio = float(fila[2]) 
+        inv = inventario.obtener_ultimo_inventario(db, id_producto)
+        cantidad = inventario.consultar_inventario1(db, inv)
+        print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad}")
+
 def consultar_productos(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PRODUCT")
