@@ -1,4 +1,5 @@
 import mensajes as msj
+import inventario
 
 def insert_producto(db):
     nombre = input("Nombre del producto: ")
@@ -19,8 +20,19 @@ def consultar_productos(db):
         id_producto = fila[0]
         nombre = fila[1]
         precio = float(fila[2]) 
-        cantidad = fila[3]
+        inv = inventario.obtener_ultimo_inventario(db, id_producto)
+        cantidad = inventario.consultar_inventario1(db, inv)
         print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad}")
+
+def consultar_producto(db, id):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM PRODUCT WHERE Pro_code = %s", (id, ))
+    datos = conection.fetchall()
+    for fila in datos:
+        id_producto = fila[0]
+        nombre = fila[1]
+        precio = float(fila[2]) 
+        return f"producto: {nombre} - precio: {precio}" 
 
 def actualizar_producto(db):
     conection = db.cursor()
