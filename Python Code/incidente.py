@@ -17,7 +17,6 @@ def insert_incidente(db):
     db.commit()
     print("Incidente agregado con éxito.")
 
-
 def agregar_clientes_incidente(db):
     conection = db.cursor()
     idIncidente = input("Ingrese el ID del incidente: ")
@@ -68,7 +67,6 @@ def cliente_incidente(db, idIncidente, idCliente, fecha):
     db.commit()
     print("Cliente agregado al incidente.")
 
-
 def consultar_incidentes(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM INCIDENT NATURAL JOIN INCIDENT_CUSTOMER ORDER BY INC_DATE DESC")
@@ -113,7 +111,6 @@ def actualizar_incidente(db):
     else:
         print(f"Incidente Actualizado.")
 
-
 def eliminar_incidente(db):
     conection = db.cursor()
     codIncidente = input("ID del incidente: ")
@@ -152,35 +149,25 @@ def eliminarClienteDeIncidente(db):
     else:
         print(f"Cliente eliminado de dicho incidente.")
 
-
 def menu_crud_incidentes(db):
     while True:
         print(msj.opcionesIncidentes)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insert_incidente(db)
-        
         elif opcion == "2":
             agregar_clientes_incidente(db)
-
         elif opcion == "3": 
             consultar_tipos_incidente(db)
-
         elif opcion == "4":
             consultar_incidentes(db)
-
         elif opcion == "5":
             actualizar_incidente(db)
-
         elif opcion == "6":
             eliminar_incidente(db)
-
         elif opcion == "7":
             eliminarClienteDeIncidente(db) 
-    
         elif opcion == "8":
             break
-
         else:
             print(msj.opcionesError)

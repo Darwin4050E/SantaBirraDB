@@ -49,7 +49,6 @@ def actualizar_objeto(db):
     else:
         print(f"Objeto actualizado.")
 
-
 def eliminar_objeto(db):
     conection = db.cursor()
     codObjeto = input("ID del objeto perdido: ")
@@ -68,21 +67,15 @@ def menu_crud_objetosperdidos(db):
     while True:
         print(msj.opcionesObjetoPerdido)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insert_object(db)
-
         elif opcion == "2":
             consultar_objetos(db)
-
         elif opcion == "3":
             actualizar_objeto(db)
-
         elif opcion == "4":
             eliminar_objeto(db)
-
         elif opcion == "5":
             break
-
         else:
             print(msj.opcionesError)

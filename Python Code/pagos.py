@@ -61,14 +61,11 @@ def actualizar_pago(db):
     else:
         print(f"Pago actualizado.")
 
-
 def eliminar_pago(db):
     conection = db.cursor()
     codReserva = input("ID de la Reserva: ")
     codPago = input("ID del pago: ")
-
-
-
+    
     query = "DELETE FROM PAY WHERE Pay_ID=%s AND Boo_ID=%s"
     values = (codPago, codReserva)
             
@@ -83,21 +80,15 @@ def menu_crud_pagos(db):
     while True:
         print(msj.opcionesPago)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insert_pago(db)
-
         elif opcion == "2":
             consultar_pagos(db)
-
         elif opcion == "3":
             actualizar_pago(db)
-
         elif opcion == "4":
             eliminar_pago(db)
-
         elif opcion == "5":
             break
-
         else:
             print(msj.opcionesError)

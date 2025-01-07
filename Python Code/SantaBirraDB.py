@@ -13,10 +13,9 @@ from inventario import *
 from reserva import *
 from objetosPerdidos import *
 from incidente import *
-
+from compras import *
 
 import mensajes as msj
-
 
 def menu_principal(db):
     while(True):

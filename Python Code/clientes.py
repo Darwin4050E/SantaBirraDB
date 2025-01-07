@@ -51,7 +51,6 @@ def eliminar_cliente(db):
     else:
         print(f"Cliente eliminado.")
 
-
 def menu_crud_clientes(db):
     while True:
         print(msj.opcionesCliente)

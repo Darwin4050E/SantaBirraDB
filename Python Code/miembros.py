@@ -1,6 +1,6 @@
 import mensajes as msj
 
-def insertar_mienbro(db):
+def insertar_miembro(db):
      cedula = input("Ingresa la cédula del empleado: ")
      nombre = input("Ingresa el nombre del empleado: ")
      apellido = input("Ingresa el apellido del empleado: ")
@@ -82,7 +82,7 @@ def menu_crud_empleados(db):
         print(msj.opcionesEmpleado)
         opcion = input("Seleccione una opción: ")  
         if opcion == "1":
-            insertar_mienbro(db)
+            insertar_miembro(db)
         elif opcion == "2":
             consultar_empleados(db)
         elif opcion == "3":

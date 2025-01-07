@@ -11,7 +11,6 @@ def insert_promociones(db):
     db.commit()
     print("Promoción agregada con éxito.")
 
-
 def consultar_promociones(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PROMOTION")
@@ -38,7 +37,6 @@ def actualizar_promocion(db):
     else:
         print(f"Promoción actualizado.")
 
-
 def eliminar_promocion(db):
     conection = db.cursor()
     codProm = input("Ingrese el ID de la promoción: ")
@@ -57,21 +55,15 @@ def menu_crud_promociones(db):
     while True:
         print(msj.opcionesPromocion)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insert_promociones(db)
-
         elif opcion == "2":
             consultar_promociones(db)
-
         elif opcion == "3":
             actualizar_promocion(db)
-
         elif opcion == "4":
             eliminar_promocion(db)
-
         elif opcion == "5":
             break
-
         else:
             print(msj.opcionesError)

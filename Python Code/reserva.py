@@ -1,3 +1,4 @@
+import datetime
 from clientes import insertar_cliente
 
 def insertar_reserva(db):
@@ -24,8 +25,6 @@ def insertar_reserva(db):
         registrar_acompanantes(ultimo_id, ids_acompanates, db)
 
     print("Reserva ingresada con éxito.")
-
-
 
 def validar_y_registrar_clientes(ids_clientes, db):
     conection = db.cursor()

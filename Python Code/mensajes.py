@@ -178,6 +178,18 @@ opcionesIncidentes = """
     ==========================================
 """
 
+opcionesCompra = """
+    ==========================================
+                Gestión de compras
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Compra.
+        2. Consultar Compra.
+        3. Modificar Compra.
+        4. Eliminar Compra.
+        5. Volver.
+    ==========================================
+"""
 
 opcionesError = """Opción no válida."""
 

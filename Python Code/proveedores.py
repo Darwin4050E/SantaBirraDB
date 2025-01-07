@@ -56,11 +56,9 @@ def menu_crud_proveedores(db):
         if opcion == "1":
             insertar_proveedor(db)
         elif opcion == "2":
-            consultar_proveedores(db)
-            
+            consultar_proveedores(db) 
         elif opcion == "3":
-            actualizar_proveedor(db)
-            
+            actualizar_proveedor(db)    
         elif opcion == "4":
             eliminar_proveedor(db)
         elif opcion == "5":

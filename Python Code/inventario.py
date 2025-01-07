@@ -13,7 +13,6 @@ def insert_inventario(db):
     db.commit()
     print("Inventario agregado con éxito.")
 
-
 def consultar_inventario(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM INVENTORY")
@@ -25,7 +24,6 @@ def consultar_inventario(db):
         codigoProd = fila[3]
 
         print(f"id: {id_inventario} - fecha: {fecha} - stock: {stock} - codigo: {codigoProd}")
-
 
 def consultar_inventario1(db, id):
     conection = db.cursor()
@@ -46,7 +44,6 @@ def obtener_ultimo_inventario(db, codProd):
         return inventario[0]  # Retorna el ID del inventario
     else:
         return None  # Si no se encontró, retorna None
-
 
 def actualizar_inventario(db):
     conection = db.cursor()
@@ -84,8 +81,6 @@ def actualizarstock_inventario(db, id, stock):
     else:
         print(f"Inventario actualizado.")
 
-
-
 def eliminar_inventario(db):
     conection = db.cursor()
     #Se eliminará el último inventario
@@ -109,21 +104,15 @@ def menu_crud_inventario(db):
     while True:
         print(msj.opcionesInventario)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insert_inventario(db)
-
         elif opcion == "2":
             consultar_inventario(db)
-
         elif opcion == "3":
             actualizar_inventario(db)
-
         elif opcion == "4":
             eliminar_inventario(db)
-
         elif opcion == "5":
             break
-
         else:
             print(msj.opcionesError)

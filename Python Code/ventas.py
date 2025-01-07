@@ -29,7 +29,6 @@ def insertar_venta(db):
         cantidades.append(cantidad)
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
 
-    
     tupla = (numero, fecha, miembro, cliente)
     sql = "INSERT INTO SALE (Sal_id, Sal_Date, Mem_id, CUS_ID) VALUES (%s, %s, %s, %s)" 
     conection.execute(sql,tupla)
@@ -42,15 +41,6 @@ def insertar_venta(db):
         inventario_id = inventario.obtener_ultimo_inventario(db, productoss[i])
         nuevo_stock = inventario.consultar_inventario1(db, inventario_id) - int(cantidades[i])
         inventario.actualizarstock_inventario(db, inventario_id, nuevo_stock)
-
-
-    
-
-    
-
-
-
-
 
 def consultar_ventas(db):
     conection = db.cursor()
@@ -75,8 +65,6 @@ def consultar_ventas(db):
             cantidad = i[2]
             print(productos.consultar_producto(db, id_p) + " - cantidad:" + str(cantidad))  
 
-
-
 def modificar_venta():
     print("hola")
 
@@ -87,11 +75,9 @@ def eliminar_venta(db):
     query2 = "DELETE FROM PRODUCT_SALE WHERE Sal_ID=%s"
     conection.execute(query2, values)
     db.commit()
-
     query = "DELETE FROM SALE WHERE Sal_ID=%s"
     values = (venta_id, )     
     conection.execute(query, values)
-    
     query2 = "DELETE FROM PRODUCT_SALE WHERE Sal_ID=%s"
     conection.execute(query2, values)
     db.commit()
