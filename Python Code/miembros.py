@@ -36,16 +36,7 @@ def insertar_mienbro(db):
          conection.execute(sql1,tupla1)
          db.commit()
 
-CREATE TABLE SALE (
-    Sal_ID INT AUTO_INCREMENT,
-    Sal_Date DATE NOT NULL,
-    Mem_ID CHAR(10) DEFAULT '0000000000',
-    Cus_ID CHAR(10) NOT NULL,
-    CONSTRAINT PK_Sale PRIMARY KEY (Sal_ID),
-    CONSTRAINT FK_SaleSeller FOREIGN KEY (Mem_ID) REFERENCES SELLER (Mem_ID) ON DELETE SET DEFAULT,
-    CONSTRAINT FK_SaleCustomer FOREIGN KEY (Cus_ID) REFERENCES CUSTOMER (Cus_ID)
-);
-      
+  
                  
      print(f"Empleado {nombre} {apellido} agregado.")
 

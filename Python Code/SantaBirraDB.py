@@ -6,11 +6,16 @@ from reportes import *
 from ventas import *
 from proveedores import *
 from miembros import *
+from zona import *
+from promociones import *
+from pagos import *
+from inventario import *
+from reserva import *
+from objetosPerdidos import *
+from incidente import *
 
 
 import mensajes as msj
-
-
 
 
 def menu_principal(db):
