@@ -190,6 +190,15 @@ opcionesCompra = """
         5. Volver.
     ==========================================
 """
+opcionesActualizacionCommpra = """
+    ==========================================
+             Actualización de compra
+    ==========================================
+    Actualizar:
+        1. Fecha de compra.
+        2. Cantidad de producto comprada.
+    ==========================================
+"""
 
 opcionesError = """Opción no válida."""
 
