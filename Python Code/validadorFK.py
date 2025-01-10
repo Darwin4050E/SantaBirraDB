@@ -4,3 +4,4 @@ def validar_clave_foranea(db, tabla, columna, valor):
     query = f"SELECT COUNT(*) FROM {tabla} WHERE {columna} = %s"
     conection.execute(query, (valor,))
     return conection.fetchone()[0] > 0
+

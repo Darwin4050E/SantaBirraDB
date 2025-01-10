@@ -1,37 +1,66 @@
 from datetime import datetime
+from fechaHelper import *
+from validadorFK import *
+from inputHelper import *
+from outputHelper import *
 import mensajes as msj
 
 def insert_inventario(db):
-    codigoProd = input("Código del producto: ")
-    stock = input("Stock del producto: ")
-    fechaIngresada = input("Fecha del inventario (YYYY-MM-DD): ")
-    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%d").date()
-    conection = db.cursor()
-    tupla = (fecha, stock, codigoProd)
-    sql = "INSERT INTO INVENTORY (Inv_Date, Inv_Stock, Pro_Code) VALUES (%s, %s, %s) "
-    conection.execute(sql,tupla)
-    db.commit()
-    print("Inventario agregado con éxito.")
 
+    codigoProd = input("Código del producto: ")
+    if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codigoProd)):
+        printMensajeErrorFK()
+        return
+    
+    idInventario = ultimo_IDProducto(db, codigoProd) + 1
+    fecha = getFecha()
+    stock = pedirEnteroPositivo("Ingrese el stock del producto: ")
+    
+    conection = db.cursor()
+
+    sql = "INSERT INTO INVENTORY (Inv_ID, Pro_Code, Inv_Date, Inv_Stock) VALUES (%s, %s, %s, %s) "
+    tupla = (idInventario, codigoProd, fecha, stock)
+    conection.execute(sql,tupla)
+
+    db.commit()
+    printIngresoExitoso()
+
+#Saca el último ID artifical de la secuencia de inventarios del producto
+def ultimo_IDProducto(db, idProducto):
+    conection = db.cursor()
+    if existeInventarioProducto(db, idProducto):
+        query = "SELECT Inv_ID FROM INVENTORY WHERE Pro_Code = %s ORDER BY Inv_ID DESC LIMIT 1"
+        conection.execute(query, (idProducto, ))
+        ic_id = conection.fetchone()
+        return int(ic_id[0])
+    else:
+        return 0
+
+def existeInventarioProducto(db, idProducto):
+    conection = db.cursor()
+    query = "SELECT COUNT(*) FROM INVENTORY WHERE Pro_Code = %s"
+    conection.execute(query, (idProducto, ))
+    return conection.fetchone()[0] > 0
+    
 def consultar_inventario(db):
     conection = db.cursor()
-    conection.execute("SELECT * FROM INVENTORY")
+    conection.execute("SELECT * FROM INVENTORY ORDER BY Pro_Code, Inv_ID")
     datos = conection.fetchall()
     for fila in datos:
         id_inventario = fila[0]
-        fecha = fila[1].strftime("%d/%m/%Y")
-        stock = int(fila[2]) 
-        codigoProd = fila[3]
+        codigoProd = fila[1]
+        fecha = fila[2].strftime("%d/%m/%Y")
+        stock = fila[3]
 
-        print(f"id: {id_inventario} - fecha: {fecha} - stock: {stock} - codigo: {codigoProd}")
+
+        print(f"id: {id_inventario} - producto: {codigoProd} - fecha: {fecha} - stock: {stock} ")
 
 def consultar_inventario1(db, id):
     conection = db.cursor()
-    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s", (id, ))
+    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s ", (id, ))
     datos = conection.fetchall()
     for fila in datos:
         stock = int(fila[2]) 
-
         return stock
 
 def obtener_ultimo_inventario(db, codProd):
@@ -47,8 +76,12 @@ def obtener_ultimo_inventario(db, codProd):
 
 def actualizar_inventario(db):
     conection = db.cursor()
-    codProd = input("Ingrese el código del producto a actualizar: ")
-    inventario = obtener_ultimo_inventario(db, codProd)
+    codigoProd = input("Código del producto: ")
+    if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codigoProd)):
+        printMensajeErrorFK()
+        return
+    
+    inventario = obtener_ultimo_inventario(db, codigoProd)
     if inventario is None:
         print("No se encontró el producto.")
         return
