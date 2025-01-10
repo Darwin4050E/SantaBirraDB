@@ -129,6 +129,59 @@ def eliminar_producto(db):
     db.commit()
     printEliminacionExitosa()
 
+def CRUD_CategoriaProductos(db):
+    while True:
+        print(msj.opcionesCategoriaProducto)
+        opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            insert_categoriaProducto(db)
+        elif opcion == "2":
+            mostrarCategorias(db)
+        elif opcion == "3":
+            actualizar_categoriaProducto(db)
+        elif opcion == "4":
+            eliminar_categoriaProducto(db)
+        elif opcion == "5":
+            break
+        else:
+            print(msj.opcionesError)
+
+def insert_categoriaProducto(db):
+    nombre = pedirNombreConSignos("Nombre de la Categoría: ")
+    conection = db.cursor()
+    conection.execute("INSERT INTO CATEGORYPROD (Cat_Name) VALUES (%s)", (nombre, ))
+    db.commit()
+    printIngresoExitoso()
+
+def actualizar_categoriaProducto(db):
+    mostrarCategorias(db)
+    conection = db.cursor()
+    categoria = pedirIdEntero("Ingrese el ID de la Categoría a actualizar: ")
+    if not validar_clave_foranea(db, "CATEGORYPROD", "Cat_ID", categoria):
+        printMensajeErrorFK()
+        return
+
+    nombre = pedirNombreConSignos("Nombre actualizado de la Categoría: ")
+    query = "UPDATE CATEGORYPROD SET Cat_Name=%s WHERE Cat_ID=%s"
+    values = (nombre, categoria)  
+    conection.execute(query, values)
+    db.commit()
+    printActualizacionExitosa()
+
+def eliminar_categoriaProducto(db):
+    mostrarCategorias(db)
+    conection = db.cursor()
+    categoria = pedirIdEntero("Ingrese el ID de la Categoría a eliminar: ")
+    if not validar_clave_foranea(db, "CATEGORYPROD", "Cat_ID", categoria):
+        printMensajeErrorFK()
+        return
+    
+    query = "DELETE FROM CATEGORYPROD WHERE Cat_ID=%s"
+    values = (categoria, )      
+    conection.execute(query, values)
+    db.commit()
+    printEliminacionExitosa()
+
 def menu_crud_productos(db):
     while True:
         print(msj.opcionesProducto)
@@ -142,6 +195,8 @@ def menu_crud_productos(db):
         elif opcion == "4":
             eliminar_producto(db)
         elif opcion == "5":
+            CRUD_CategoriaProductos(db)
+        elif opcion == "6":
             break
         else:
             print(msj.opcionesError)

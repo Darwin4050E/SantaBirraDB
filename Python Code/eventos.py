@@ -86,6 +86,62 @@ def eliminar_evento(db):
     db.commit()
     printEliminacionExitosa()
 
+def CRUD_CategoriaEvento(db):
+    while True:
+        print(msj.opcionesCategoriaEvento)
+        opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            insertar_categoriaEve(db)
+        elif opcion == "2":
+            mostrarCategorias(db)
+        elif opcion == "3":
+            actualizar_categoriasEve(db)
+        elif opcion == "4":
+            eliminar_cateogriasEve(db)
+        elif opcion == "5":
+            break
+        else:
+            print(msj.opcionesError)
+
+def insertar_categoriaEve(db):
+    nombre = pedirNombreConSignos("Nombre de la Categoría: ")
+    conection = db.cursor()
+    tupla = (nombre,)
+    sql = "INSERT INTO CATEGORYEVE (Cat_Name) VALUES (%s) "
+    conection.execute(sql,tupla)
+    db.commit()
+    printIngresoExitoso()
+
+def actualizar_categoriasEve(db):
+    mostrarCategorias(db)
+    conection = db.cursor()
+    categoria = pedirIdEntero("Ingrese el ID de la Categoría a actualizar: ")
+    if not validar_clave_foranea(db, "CATEGORYEVE", "Cat_ID", categoria):
+        printMensajeErrorFK()
+        return
+
+    nombre = pedirNombreConSignos("Nombre actualizado de la Categoría: ")
+    query = "UPDATE CATEGORYEVE SET Cat_Name=%s WHERE Cat_ID=%s"
+    values = (nombre, categoria)  
+    conection.execute(query, values)
+    db.commit()
+    printActualizacionExitosa()
+
+def eliminar_cateogriasEve(db):
+    mostrarCategorias(db)
+    conection = db.cursor()
+    categoria = pedirIdEntero("Ingrese el ID de la Categoría a eliminar: ")
+    if not validar_clave_foranea(db, "CATEGORYEVE", "Cat_ID", categoria):
+        printMensajeErrorFK()
+        return
+    
+    query = "DELETE FROM CATEGORYEVE WHERE Cat_ID=%s"
+    values = (categoria, )      
+    conection.execute(query, values)
+    db.commit()
+    printEliminacionExitosa()
+
+
 def menu_crud_eventos(db):
     while True:
         print(msj.opcionesEvento)
@@ -99,6 +155,8 @@ def menu_crud_eventos(db):
         elif opcion == "4":
             eliminar_evento(db)
         elif opcion == "5":
+            CRUD_CategoriaEvento(db)
+        elif opcion == "6":
             break
         else:
             print(msj.opcionesError)

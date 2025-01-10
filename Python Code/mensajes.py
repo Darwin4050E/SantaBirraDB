@@ -71,6 +71,20 @@ opcionesProducto = """
         2. Consultar Productos.
         3. Actualizar Producto.
         4. Eliminar Producto.
+        5. Gestión de Categorías.
+        6. Volver.
+    ==========================================
+"""
+
+opcionesCategoriaProducto = """
+    ==========================================
+        Gestión de Categorias de Productos
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Categoría.
+        2. Consultar Categorías.
+        3. Actualizar Categoría.
+        4. Eliminar Categoría.
         5. Volver.
     ==========================================
 """
@@ -84,6 +98,20 @@ opcionesEvento = """
         2. Consultar Eventos.
         3. Actualizar Evento.
         4. Eliminar Evento.
+        5. Gestión de Categorías.
+        6. Volver.
+    ==========================================
+"""
+
+opcionesCategoriaEvento = """
+    ==========================================
+        Gestión de Categorias de Eventos
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Categoria.
+        2. Consultar Categorias.
+        3. Actualizar Categoria.
+        4. Eliminar Categoria.
         5. Volver.
     ==========================================
 """
