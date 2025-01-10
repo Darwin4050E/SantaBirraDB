@@ -5,6 +5,10 @@ from outputHelper import *
 
 def insertar_cliente(db):
     cedula = pedirCedula("Cédula: ")
+    if validar_clave_foranea(db, "CUSTOMER", "Cus_ID", cedula):
+        printMensajeIngresoExistente()
+        return
+    
     nombre = pedirNombre("Nombre: ")
     apellido = pedirApellido("Apellido: ")
     correo = pedirCorreo("Correo: ")

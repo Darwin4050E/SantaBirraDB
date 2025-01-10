@@ -5,6 +5,13 @@ def pedirEnteroPositivo(mensaje):
         numero = input(mensaje)
     return int(numero)
 
+def pedirNatural(mensaje):
+    numero = input(mensaje)
+    while(not numero.isdigit() or int(numero) <= 0):
+        print("Ingrese una entrada válida.")
+        numero = input(mensaje)
+    return int(numero)
+
 def pedirDecimalPositivo(mensaje):
     numero = input(mensaje)
     while(not numero.replace(".","").isdigit() or float(numero) < 0):
@@ -84,3 +91,25 @@ def pedirEntreDosOpciones(mensajeOpciones, opcionUno, opcionDos):
         print("Ingrese una opción válida.")
         opcion = input("Ingrese una opción: ")
     return int(opcion)
+
+def pedirSiONo(mensaje):
+    inputUsuario = input(mensaje).lower()
+    opciones = ["s","n"]
+    while inputUsuario not in opciones:
+        print("Ingrese una opción válida.")
+        inputUsuario = input(mensaje).lower()
+    return inputUsuario 
+
+def pedirDescripcion(mensaje):
+    descripcion = input(mensaje)
+    while len(descripcion) < 5:
+        print("Ingrese una descripción válida.")
+        descripcion = input(mensaje)
+    return descripcion
+
+def pedirIdEntero(mensaje):
+    id = input(mensaje)
+    while not id.isdigit() or int(id) <= 0:
+        print("Ingrese un ID válido.")
+        id = input(mensaje)
+    return int(id)

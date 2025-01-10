@@ -168,7 +168,7 @@ opcionesIncidentes = """
                 Gestión de Incidentes
     ==========================================
     Seleccione una opción:
-        1. Insertar Incidente.
+        1. Insertar Tipo de Incidente.
         2. Agregar Clientes a Incidente.
         3. Consultar Tipos de Incidente.
         4. Consultar Incidentes Ocurridos.

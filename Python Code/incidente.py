@@ -1,42 +1,49 @@
 from validadorFK import *
 from datetime import *
 import mensajes as msj
+from inputHelper import *
+from fechaHelper import *
+from outputHelper import *
+from miembros import *
+from clientes import *
 
 def insert_incidente(db):
     conection = db.cursor()
-    descripcion = input("Descripción del incidente: ")
-    guardia = input("ID del guardia que atendió el incidente: ")
+    descripcion = pedirDescripcion("Descripción del incidente: ")
+    
+    guardia = pedirGuardia(db, "Cédula del guardia encargado: ")
 
     if not validar_clave_foranea(db, "GUARD", "Mem_ID", guardia):
-        print("No existe guardia con ese ID")
+        printMensajeErrorFK()
         return
 
     tupla = (descripcion, guardia)
     sql = "INSERT INTO INCIDENT (Inc_Desc, Mem_ID) VALUES (%s, %s) "
     conection.execute(sql,tupla)
     db.commit()
-    print("Incidente agregado con éxito.")
+    printIngresoExitoso()
+
+def pedirGuardia(db, mensaje):
+    print("\nGuardias disponibles: ")
+    consultar_empleadosPorRol(db, "GUARD")
+    guardia = pedirCedula(mensaje)
+    return guardia
 
 def agregar_clientes_incidente(db):
-    conection = db.cursor()
-    idIncidente = input("Ingrese el ID del incidente: ")
+    idIncidente = pedirIdEntero("ID del incidente: ")
 
     if not validar_clave_foranea(db, "INCIDENT", "Inc_ID", idIncidente):
-        print("No existe incidente con ese ID")
+        printMensajeErrorFK()
         return
     
-    cantidad = int(input("Ingrese la cantidad de clientes que participaron en el incidente: "))
-    if cantidad <= 0:
-        print("Ingrese datos válidos.")
-        return
+    fecha = getFecha()
+    cantidad = pedirNatural("Cantidad de clientes a agregar: ")
     
-    fechaIngresada = input("Fecha del incidente (YYYY-MM-DD): ")
-    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%d").date()
-    
+    consultar_clientes(db)
     for i in range(cantidad):
-        idCliente = input("Ingrese ID del cliente: ")
+        idCliente = pedirCedula(f"ID del cliente {i+1} : ")
         if not validar_clave_foranea(db, "CUSTOMER", "Cus_ID", idCliente):
-            print("No existe tal cliente. Por favor agreguelo en la sección de clientes e intente de nuevo.")
+            printMensajeErrorAgregacion()
         else:
             cliente_incidente(db, idIncidente, idCliente, fecha)
 
@@ -78,7 +85,7 @@ def consultar_incidentes(db):
         ic_id = fila[3]
         cliente = fila[4]
         fecha = fila[5].strftime("%d/%m/%Y")
-        print(f"id: {id} - descripcion: {descripcion} - guardia: {guardia} - IC_ID: {ic_id} - cliente: {cliente} - fecha: {fecha}")
+        print(f"id Incidente: {id} - descripcion: {descripcion} - guardia: {guardia} - IncCliente_ID: {ic_id} - cliente: {cliente} - fecha: {fecha}")
         
 def consultar_tipos_incidente(db):
     conection = db.cursor()
@@ -88,56 +95,56 @@ def consultar_tipos_incidente(db):
         id = fila[0]
         descripcion = fila[1]
         guardia = fila[2]
-        print(f"id: {id} - descripcion: {descripcion} - guardia: {guardia}")
+        print(f"id: {id} - descripción: {descripcion} - guardia: {guardia}")
 
 def actualizar_incidente(db):
     conection = db.cursor()
-    codIncidente = input("ID del incidente: ")
-    guardia = input("ID del guardia que atendió el incidente actualizado: ")
-
-    if not validar_clave_foranea(db, "GUARD", "Mem_ID", guardia):
-        print("No existe guardia con ese ID.")
+    codIncidente = pedirIdEntero("ID del incidente: ")
+    if not validar_clave_foranea(db, "INCIDENT", "Inc_ID", codIncidente):
+        printMensajeErrorFK()
         return
 
-    descripcion = input("Descripción actualizada: ")
+    guardia = pedirGuardia(db, "Cédula actualizada del guardia encargado: ")
+
+    if not validar_clave_foranea(db, "GUARD", "Mem_ID", guardia):
+        printMensajeErrorFK()
+        return
+
+    descripcion = pedirDescripcion("Descripción del incidente actualizada: ")
 
     query = "UPDATE INCIDENT SET Inc_Desc=%s, Mem_ID=%s WHERE Inc_ID = %s"
     values = (descripcion, guardia, codIncidente)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró tal incidente.")
-    else:
-        print(f"Incidente Actualizado.")
+    printActualizacionExitosa()
 
 def eliminar_incidente(db):
     conection = db.cursor()
-    codIncidente = input("ID del incidente: ")
-    
+    codIncidente = pedirIdEntero("ID del incidente: ")    
     query = "DELETE FROM INCIDENT WHERE Inc_ID = %s"
     values = (codIncidente, )
             
     conection.execute(query, values)
     db.commit()
     if conection.rowcount == 0:
-        print("No se encontró tal incidente.")
+        printMensajeErrorFK()
     else:
-        print(f"Incidente eliminado.")
+        printEliminacionExitosa()
 
 def eliminarClienteDeIncidente(db):
     conection = db.cursor()
-    codIncidente = input("ID del incidente: ")
+    codIncidente = pedirIdEntero("ID del incidente: ")
     if not validar_clave_foranea(db, "INCIDENT", "Inc_ID", codIncidente):
-        print("No existe incidente con ese ID")
+        printMensajeErrorFK()
         return
     
-    idCliente = input("ID del cliente: ")
+    idCliente = pedirCedula("ID del cliente: ")
     if not validar_clave_foranea(db, "CUSTOMER", "Cus_ID", idCliente):
-        print("No existe tal cliente.")
+        printMensajeErrorFK()
         return
     
-    ic_id = input("Ingrese el ID de dicha combinación Incidente-Cliente: ")
+    ic_id = pedirIdEntero("ID de la relación incidente-cliente: ")
 
     query = "DELETE FROM INCIDENT_CUSTOMER WHERE Inc_ID = %s AND Cus_ID = %s AND IC_ID = %s"
     values = (codIncidente, idCliente, ic_id)
@@ -145,9 +152,9 @@ def eliminarClienteDeIncidente(db):
     conection.execute(query, values)
     db.commit()
     if conection.rowcount == 0:
-        print("No se encontró tal registro de incidente.")
+        printMensajeErrorFK()
     else:
-        print(f"Cliente eliminado de dicho incidente.")
+        printEliminacionExitosa()
 
 def menu_crud_incidentes(db):
     while True:
@@ -156,16 +163,20 @@ def menu_crud_incidentes(db):
         if opcion == "1":
             insert_incidente(db)
         elif opcion == "2":
+            consultar_tipos_incidente(db)
             agregar_clientes_incidente(db)
         elif opcion == "3": 
             consultar_tipos_incidente(db)
         elif opcion == "4":
             consultar_incidentes(db)
         elif opcion == "5":
+            consultar_tipos_incidente(db)
             actualizar_incidente(db)
         elif opcion == "6":
+            consultar_tipos_incidente(db)
             eliminar_incidente(db)
         elif opcion == "7":
+            consultar_incidentes(db)
             eliminarClienteDeIncidente(db) 
         elif opcion == "8":
             break

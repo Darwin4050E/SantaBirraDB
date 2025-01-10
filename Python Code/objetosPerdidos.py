@@ -1,24 +1,35 @@
 from validadorFK import *
 from datetime import *
 import mensajes as msj
+from inputHelper import *
+from outputHelper import *
+from fechaHelper import *
+from zona import *
 
 def insert_object(db):
     conection = db.cursor()
-    codZona = input("ID de la Zona: ")
-
-    if not validar_clave_foranea(db, "ZONE", "Zon_ID", codZona):
-        print("No existe Zona con ese ID")
-        return
     
-    descripcion = input("Descripción del objeto: ")
-    fechaIngresada = input("Fecha del incidente (YYYY-MM-DD): ")
-    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%d").date()
+    descripcion = pedirDescripcion("Descripción del objeto: ")
+    fecha = getFecha()
+    codZona = pedirZona(db)
 
     tupla = (fecha, descripcion, codZona)
     sql = "INSERT INTO LOSTOBJECT (Los_Date, Los_Des, Zon_ID) VALUES (%s, %s, %s) "
     conection.execute(sql,tupla)
     db.commit()
-    print("Objeto perdido agregado con éxito.")
+    printIngresoExitoso()
+
+def pedirZona(db):
+    opcion = pedirEntreDosOpciones("Opciones para Zona", "No asignar Zona", "Ingresar Zona")
+    if opcion == 1:
+        return None
+    else:
+        consultar_zonas(db)
+        zona = pedirIdEntero("ID de la zona: ")
+        while not validar_clave_foranea(db, "Zone", "Zon_ID", zona):
+            printMensajeErrorFK()
+            zona = pedirIdEntero("ID de la zona: ")
+        return zona
 
 def consultar_objetos(db):
     conection = db.cursor()
@@ -32,36 +43,40 @@ def consultar_objetos(db):
         print(f"id: {id} - fecha: {fecha} - descripcion: {descripcion} - zonaId: {zona}")
 
 def actualizar_objeto(db):
+    consultar_objetos(db)
     conection = db.cursor()
-    codObjeto = input("ID del objeto perdido: ")
+    codObjeto = pedirIdEntero("ID del objeto perdido: ")
 
-    fechaIngresada = input("Fecha del objeto perdido actualizada (YYYY-MM-DD): ")
-    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%d").date()
-    descripcion = input("Descripción del objeto: ")
+    if not validar_clave_foranea(db, "LOSTOBJECT", "Los_ID", codObjeto):
+        printMensajeErrorFK()
+        return
 
-    query = "UPDATE LOSTOBJECT SET Los_Date=%s, Los_Des=%s WHERE Los_ID=%s"
-    values = (fecha, descripcion, codObjeto)
+    descripcion = pedirDescripcion("Descripción del objeto: ")
+    fecha = getFecha()
+    zona = pedirZona(db)
+
+    query = "UPDATE LOSTOBJECT SET Los_Date=%s, Los_Des=%s, Zon_ID=%s WHERE Los_ID=%s"
+    values = (fecha, descripcion, zona, codObjeto)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró tal objeto.")
-    else:
-        print(f"Objeto actualizado.")
+    printActualizacionExitosa()
 
 def eliminar_objeto(db):
+    consultar_objetos(db)
     conection = db.cursor()
-    codObjeto = input("ID del objeto perdido: ")
+    codObjeto = pedirIdEntero("ID del objeto perdido: ")
+
+    if not validar_clave_foranea(db, "LOSTOBJECT", "Los_ID", codObjeto):
+        printMensajeErrorFK()
+        return
 
     query = "DELETE FROM LOSTOBJECT WHERE Los_ID=%s"
     values = (codObjeto, )
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró tal objeto.")
-    else:
-        print(f"Objeto eliminado.")
+    printEliminacionExitosa()
 
 def menu_crud_objetosperdidos(db):
     while True:

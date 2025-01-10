@@ -5,6 +5,10 @@ from validadorFK import *
 
 def crear_miembro(db):
     cedula = pedirCedula("Cédula del empleado: ")
+    if validar_clave_foranea(db, "MEMBER", "Mem_ID", cedula):
+        printMensajeIngresoExistente()
+        return
+
     nombre = pedirNombre("Nombre del empleado: ")
     apellido = pedirApellido("Apellido del empleado: ")
     experiencia = pedirEnteroPositivo("Experiencia del empleado en años: ")
@@ -24,10 +28,11 @@ def crear_miembro(db):
 def pedirRol():
     roles = ["G","P","S","M"]
     print("\nOpciones de rol.\nG - Guardia.\nP - Promotor.\nS - Vendedor\nM - Manager")
-    rol = input("Rol: ")
+    rol = input("Rol: ").upper()
     while rol not in roles:
         print("Ingrese un rol válido.")
-        rol = input("Rol: ")
+        rol = input("Rol: ").upper()
+    print()
     return rol
 
 def ingresarPorRol(db, conection, rol, cedula):
@@ -124,10 +129,10 @@ def consultarPorRol(db):
         consultar_empleadosPorRol(db, "MANAGER")
 
 def consultarEmpleadosPorRolBucle(db):
-    continuar = input("\n¿Desea consultar empleados? Presione s para continuar o cualquier letra para salir: ")
-    while continuar == "s" or continuar == "S":
+    inputUsuario = pedirSiONo("¿Desea consultar empleados? Presione s para continuar o n para salir: ")
+    while inputUsuario == "s":
         consultarPorRol(db)
-        continuar = input("\n¿Desea consultar empleados? Presione s para continuar o cualquier letra para salir: ")
+        inputUsuario = pedirSiONo("¿Desea consultar empleados? Presione s para continuar o n para salir: ")
 
 def actualizar_empleado(db):
     conection = db.cursor()
