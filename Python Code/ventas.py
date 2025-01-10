@@ -121,18 +121,16 @@ def consultar_ventas_sin(db):
 
 def consultar_ventas(db):
     consultar_ventas_sin(db)
-    eleccion = input("Ingrese S si desea consultar los detalles de una venta: ")
-    if eleccion == "S":
-        venta = pedirIdEntero("Ingrese el ID de la venta que desea consultar: ")
-        if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
-            printMensajeErrorFK()
-            return
+    venta = pedirIdEntero("Ingrese el ID de la venta que desea consultar: ")
+    if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
+        printMensajeErrorFK()
+        return
         
-        dato1, dato2 = consultar_venta(db, venta)
-        for i in range(len(dato1)):
-            id_p = dato1[i]
-            cantidad = dato2[i]
-            print(productos.consultar_producto(db, id_p) + " - cantidad:" + str(cantidad))  
+    dato1, dato2 = consultar_venta(db, venta)
+    for i in range(len(dato1)):
+        id_p = dato1[i]
+        cantidad = dato2[i]
+        print(productos.consultar_producto(db, id_p) + " - cantidad:" + str(cantidad))  
 
 def modificar_venta(db):
     consultar_ventas_sin(db)
@@ -143,7 +141,10 @@ def modificar_venta(db):
     
     productoss = []
     cantidades = []
-    productos.consultar_productos_ex(db, ids)
+    dato1, dato2 = consultar_venta(db, venta)
+    dato1 = tuple(dato1)
+    productos.consultar_productos_ex(db, dato1)
+    pro_eleccion = ""
     while pro_eleccion !="N":
         ids, data = consultar_venta(db, venta)
         producto = pedirProductoSinMostrar(db)

@@ -42,12 +42,14 @@ def pedirCategoria(db):
 
 def consultar_productos_ex(db, ids):
     conection = db.cursor()
-    ids =(ids)
+    
+
     if len(ids) == 1:
-         query = "SELECT * FROM PRODUCT WHERE Pro_code != %s"
-         conection.execute(query, (ids[0],))  # Pasamos el solo valor como tupla
-    else:
-        query = "SELECT * FROM PRODUCT WHERE Pro_code NOT IN (%s)" % ','.join(['%s'] * len(ids))
+        query = "SELECT * FROM PRODUCT WHERE Pro_code != %s"
+        conection.execute(query, (ids[0],))  # Pasamos el único valor como tupla
+    elif len(ids) > 1:
+        placeholders = ','.join(['%s'] * len(ids))  # Crea un marcador para cada ID
+        query = f"SELECT * FROM PRODUCT WHERE Pro_code NOT IN ({placeholders})"
         conection.execute(query, tuple(ids))
     datos = conection.fetchall()
     for fila in datos:
