@@ -141,6 +141,34 @@ opcionesVenta = """
     ==========================================
 """
 
+opcionesReserva = """
+    ==========================================
+                Gestión de Reservas
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Reserva.
+        2. Consultar Reservas.
+        3. Consultar Reserva por ID.
+        4. Modificar Reserva.
+        5. Eliminar Reserva.
+        6. Volver.
+    ==========================================
+"""
+
+opcionesActualizacionReserva = """
+    ==========================================
+            Actualización de Reservas
+    ==========================================
+    Seleccione una opción:
+        1. Actualizar Fecha.
+        2. Actualizar Hora.
+        3. Actualizar Zona.
+        4. Actualizar Estado.
+        5. Actualizar Promoción.
+        6. Volver
+    ==========================================
+"""
+
 opcionesZona = """
     ==========================================
                 Gestión de Zonas

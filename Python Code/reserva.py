@@ -1,36 +1,112 @@
-import datetime
+import mensajes as msj
 from clientes import insertar_cliente
-from zona import consultar_zonas
+from zona import *
 from inputHelper import *
 from fechaHelper import *
+from miembros import *
+from promociones import *
+from eventos import *
+from clientes import *
+from outputHelper import *
 
 def insertar_reserva(db):
     conection = db.cursor()
     fecha = getFecha()
-    hora = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
-    cliente = input("Ingrese el ID del cliente que realizó la reserva: ")
-    promotor = input("Por favor ingrese el ID del promotor del evento: ")
-    promocion = input("Por favor ingrese el ID de la promoción: ")
-    evento = input("Por favor ingrese el ID del evento: ")
-    estado = input("Por favor ingrese el ID de estado de la reserva: ")
-    print("Estas son las zonas disponibles: ")
-    consultar_zonas(db)
-    zona = input("Por favor ingrese el ID de la zona a reservar: ")
-    tupla = (fecha, hora, cliente, promotor,promocion, evento, estado)
+    hora = getHora()
+    cliente = pedirCliente(db)
+    promotor = pedirPromotor(db)
+    promocion = pedirPromocion(db)
+    evento = pedirEvento(db)
+    estado = pedirEstado(db)
+    zona = pedirZona(db)
+
+    tupla = (fecha, hora, cliente, promotor, promocion, evento, estado)
 
     query = "INSERT INTO BOOKING(Boo_Date, Boo_Hour, Cus_ID, Mem_ID, Prom_ID, Eve_ID, Sta_ID) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     conection.execute(query,tupla)
     db.commit()    
-    nro_participantes = int(input("Ingrese el numero de acompañantes: "))
+
     conection.execute("SELECT LAST_INSERT_ID()")
     ultimo_id = conection.fetchone()[0]
-    query2 = "INSERT INTO BOOKING_ZONE(Boo_ID, Zon_ID) VALUES (%s, %s)"
-    conection.execute(query2,(ultimo_id, zona))
+
+    query = "INSERT INTO BOOKING_ZONE(Boo_ID, Zon_ID) VALUES (%s, %s)"
+    conection.execute(query,(ultimo_id, zona))
+    db.commit()
+
+    print()
+    nro_participantes = pedirEnteroPositivo("Ingrese la cantidad de acompañantes: ")
     if nro_participantes > 0:
         ids_acompanates = lista_acompanantes(nro_participantes)
         registrar_acompanantes(ultimo_id, ids_acompanates, db)
+    print("Reserva registrada con éxito.")
+    
 
-    print("Reserva ingresada con éxito.")
+def pedirPromotor(db):
+    opcion = pedirEntreDosOpciones("Opciones para Promotor", "No asignar Promotor", "Ingresar Promotor")
+    if opcion == 1:
+        return None
+    else:
+        consultar_empleadosPorRol(db, "PROMOTOR")
+        promotor = pedirCedula("Cédula del promotor: ")
+        while not validar_clave_foranea(db, "PROMOTOR", "Mem_ID", promotor):
+            printMensajeErrorFK()
+            promotor = pedirCedula("Cédula del promotor: ")
+        return promotor
+
+def pedirPromocion(db):
+    opcion = pedirEntreDosOpciones("Opciones para Promoción", "No asignar Promoción", "Ingresar Promoción")
+    if opcion == 1:
+        return None
+    else:
+        consultar_promociones(db)
+        promocion = pedirIdEntero("ID de la promoción: ")
+        while not validar_clave_foranea(db, "PROMOTION", "Prom_ID", promocion):
+            printMensajeErrorFK()
+            promocion = pedirIdEntero("ID de la promoción: ")   
+        return promocion
+
+def pedirEvento(db):
+    print("\nEventos:")
+    consultar_eventos(db)
+    evento = pedirIdEntero("ID del evento: ")
+    while not validar_clave_foranea(db, "EVENT", "Eve_ID", evento):
+        printMensajeErrorFK()
+        evento = pedirIdEntero("ID del evento: ")     
+    return evento
+
+def pedirCliente(db):
+    print("\nClientes:")
+    consultar_clientes(db)
+    cliente = pedirCedula("Cédula del cliente: ")
+    while not validar_clave_foranea(db, "CUSTOMER", "Cus_ID", cliente):
+        printMensajeErrorFK()
+        cliente = pedirCedula("Cédula del cliente: ")
+    return cliente
+
+def pedirEstado(db):
+    print("\nEstados:")
+    consultar_estados(db)
+    estado = pedirIdEntero("ID del estado: ")
+    while not validar_clave_foranea(db, "STATUS", "Sta_ID", estado):
+        printMensajeErrorFK()
+        estado = pedirIdEntero("ID del estado: ")
+    return estado
+
+def consultar_estados(db):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM STATUS")
+    datos = conection.fetchall()
+    for fila in datos:
+        print(f"ID: {fila[0]} - Nombre: {fila[1]}")
+
+def pedirZona(db):
+    print("\nZonas:")
+    consultar_zonas(db)
+    zona = pedirIdEntero("ID de la zona: ")
+    while not validar_clave_foranea(db, "ZONE", "Zon_ID", zona):
+        printMensajeErrorFK()
+        zona = pedirIdEntero("ID de la zona: ")
+    return zona
 
 def validar_y_registrar_clientes(ids_clientes, db):
     conection = db.cursor()
@@ -43,41 +119,57 @@ def validar_y_registrar_clientes(ids_clientes, db):
     ids_invalidos = set(ids_clientes) - ids_validos
 
     for id_invalido in ids_invalidos:
+        print()
         print(f"El cliente con ID {id_invalido} no existe.")
         print("Por favor, ingrese los datos del cliente.")
         insertar_cliente(db)
-    
-    return True
 
-def validar_ID(id_cliente):
-    if len(id_cliente) != 10:
-        print("El ID del cliente no es válido. Debe tener 10 caracteres. Intente nuevamente")
-        return False
-    return True
-
-def lista_acompanantes(nro_acompanantes):
+def lista_acompanantes(db, nro_acompanantes):
+    print("\nClientes disponibles:")
+    consultar_clientes(db)
     lista = []
     for i in range(nro_acompanantes):
-        while True:
-            id_acompanante = input(f"Ingrese el ID del acompañante {i+1}: ")
-            if validar_ID(id_acompanante):
-                break
+        id_acompanante = pedirCedula(f"Ingrese la cédula del acompañante {i+1}: ")
         lista.append(id_acompanante)
     return lista
 
 def registrar_acompanantes(id_reserva, ids_acompanantes, db):
     conection = db.cursor()
-    if validar_y_registrar_clientes(ids_acompanantes, db):
-        for id_acompanante in ids_acompanantes:
-            query = "INSERT INTO BOOKING_CUSTOMER(Boo_ID, Cus_ID) VALUES (%s, %s)"
-            conection.execute(query, (id_reserva, id_acompanante))
+    validar_y_registrar_clientes(ids_acompanantes, db)
+    for id_acompanante in ids_acompanantes:
+        query = "INSERT INTO BOOKING_CUSTOMER(Boo_ID, Cus_ID) VALUES (%s, %s)"
+        conection.execute(query, (id_reserva, id_acompanante))
         db.commit()
-        print("Acompañantes registrados con éxito.")
+    print("Acompañantes registrados con éxito.")
 
-def consultar_reserva(db):
+def consultar_datos_reserva(db, reserva):
     conection = db.cursor()
-    id_r = input("Ingrese el ID de la reserva que desea consultar: ")
-    conection.execute(f"SELECT * FROM BOOKING WHERE Boo_ID ={id_r}")
+    if not validar_clave_foranea(db, "BOOKING", "Boo_ID", reserva):
+        printMensajeErrorFK()
+        return
+    
+    conection.execute("SELECT * FROM BOOKING JOIN BOOKING_CUSTOMER USING (Boo_ID) WHERE Boo_ID = %s", (reserva,))
+    datos = conection.fetchall()
+    print("\nDatos de la reserva:")
+    for fila in datos:
+        id_reserva = fila[0]
+        fecha = fila[1]
+        hora = fila[2]
+        cliente_id = fila[3]
+        promotor_id = fila[4]
+        promocion_id = fila[5]
+        evento_id = fila[6]
+        estado_id = fila[7]
+        acompañante = fila[8]
+        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id} - Acompañante: {acompañante}")
+
+def consultar_reserva(db, reserva):
+    conection = db.cursor()
+    if not validar_clave_foranea(db, "BOOKING", "Boo_ID", reserva):
+        printMensajeErrorFK()
+        return
+    
+    conection.execute("SELECT * FROM BOOKING WHERE Boo_ID = %s", (reserva,))
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
@@ -88,109 +180,126 @@ def consultar_reserva(db):
         promocion_id = fila[5]
         evento_id = fila[6]
         estado_id = fila[7]
-        print(f"(Num. Reserva: {id_reserva}, Fecha: {fecha}, Hora: {hora}, ID Cliente: {cliente_id}, ID Promotor: {promotor_id}, ID Promocion: {promocion_id}, ID Evento: {evento_id}, ID Estado: {estado_id})")
+        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id}")
 
-def actualizar_reserva(db):
+def consultar_reservas(db):
     conection = db.cursor()
-    reserva_id = input("Ingrese el ID de la reserva que desea modificar: ")
+    conection.execute("SELECT * FROM BOOKING")
+    datos = conection.fetchall()
+    for fila in datos:
+        id_reserva = fila[0]
+        fecha = fila[1]
+        hora = fila[2]
+        cliente_id = fila[3]
+        promotor_id = fila[4]
+        promocion_id = fila[5]
+        evento_id = fila[6]
+        estado_id = fila[7]
+        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id}")
+
+def pedirIdReserva(db):
+    consultar_reservas(db)
+    print()
+    id_reserva = pedirIdEntero("Ingrese el ID de la reserva: ")
+    while not validar_clave_foranea(db, "BOOKING", "Boo_ID", id_reserva):
+        printMensajeErrorFK()
+        id_reserva = pedirIdEntero("Ingrese el ID de la reserva: ")
+    return id_reserva
+
+def actualizar_reserva(db, reserva_id):
+    conection = db.cursor()
+    
+    consultar_reserva(db, reserva_id)
+
     while True:
-        print(f"""
-        === Actualizar Reserva {reserva_id} - Santa Birra ===
-        1. Actualizar Fecha
-        2. Actualizar Zona
-        3. Actualizar Estado
-        4. Actualizar Promoción
-        5. Volver
-        """)
+        print(msj.opcionesActualizacionReserva)
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
             actualizar_fecha(conection,reserva_id,db)
         elif opcion == "2":
-            actualizar_zona(conection,reserva_id,db)
+            actualizar_hora(conection,reserva_id,db)
         elif opcion == "3":
-            actualizar_estado(conection,reserva_id,db)
+            actualizar_zona(conection,reserva_id,db)
         elif opcion == "4":
-            actualizar_promocion(conection,reserva_id,db)
+            actualizar_estado(conection,reserva_id,db)
         elif opcion == "5":
+            actualizar_promocion(conection,reserva_id,db)
+        elif opcion == "6":
             break
         else:
-            print("Opción no válida.")
+            print(msj.opcionesError)
 
 def actualizar_fecha(conection,reserva_id,db):
-    fecha = input("Ingrese la nueva fecha de la reserva (YYYY-MM-DD): ")
+    fecha = getFecha()
     query = "UPDATE BOOKING SET Boo_Date=%s WHERE Boo_ID=%s"
     values = (fecha, reserva_id)
     conection.execute(query, values)
     db.commit()
-    print("Fecha actualizada!")
+    printActualizacionExitosa()
+
+def actualizar_hora(conection,reserva_id,db):
+    hora = getHora()
+    query = "UPDATE BOOKING SET Boo_Hour=%s WHERE Boo_ID=%s"
+    values = (hora, reserva_id)
+    conection.execute(query, values)
+    db.commit()
+    printActualizacionExitosa()
 
 def actualizar_zona(conection, reserva_id,db):
-    zona = input("Ingrese el ID de la zona nueva de la reserva: ")
+    zona = pedirZona(db)
     query = "UPDATE BOOKING_ZONE SET Zon_ID=%s WHERE Boo_ID=%s"
     values = (zona, reserva_id)
     conection.execute(query, values)
     db.commit()
-    print("Zona actualizada!")
+    printActualizacionExitosa()
 
 def actualizar_estado(conection, reserva_id,db):
-    estado = input("Ingrese el ID del estado nuevo de la reserva: ")
+    estado = pedirEstado(db)
     query = "UPDATE BOOKING SET Sta_ID=%s WHERE Boo_ID=%s"
     values = (estado, reserva_id)
     conection.execute(query, values)
     db.commit()
-    print("Estado actualizado!")
+    printActualizacionExitosa()
 
-def actualizar_promocion(conection, reserva_id):
-    promocion = input("Ingrese el ID de la promoción nueva de la reserva: ")
+def actualizar_promocion(conection, reserva_id, db):
+    promocion = pedirPromocion(db)
     query = "UPDATE BOOKING SET Prom_ID=%s WHERE Boo_ID=%s"
     values = (promocion, reserva_id)
     conection.execute(query, values)
     db.commit()
-    print("Promoción actualizada!")
+    printActualizacionExitosa()
 
-def eliminar_reserva(db):
+def eliminar_reserva(db, reserva):
     conection = db.cursor()
-    reserva_id = input("Ingrese el ID de la reserva que desea eliminar: ")
-
     query = "DELETE FROM BOOKING WHERE Boo_ID=%s"
-    values = (reserva_id, )
+    values = (reserva,)
     conection.execute(query, values)
-
+    db.commit()
     
     if conection.rowcount == 0:
-        print("No se encontró ninguna reserva con ese ID.")
+        printMensajeErrorFK()
     else:
-        print(f"Reserva {reserva_id} eliminada.")
+        printEliminacionExitosa()
 
-    query2 = "DELETE FROM PAY WHERE Boo_ID=%s"
-    conection.execute(query2, values)
-
-    query3 = "DELETE FROM BOOKING_CUSTOMER WHERE Boo_ID=%s"
-    conection.execute(query3, values)
-
-    db.commit()
 
 def menu_crud_reservas(db):
     while True:
-        print("""
-        === Gestión de Reservas - Santa Birra ===
-        1. Insertar Reserva
-        2. Consultar Reserva
-        3. Modificar Reserva
-        4. Eliminar Reserva
-        5. Volver
-        """)
+        print(msj.opcionesReserva)
         opcion = input("Seleccione una opción: ")
-        
         if opcion == "1":
             insertar_reserva(db)
         elif opcion == "2":
-            consultar_reserva(db)
+            consultar_reservas(db)
         elif opcion == "3":
-            actualizar_reserva(db)
+            reserva = pedirIdReserva(db)
+            consultar_datos_reserva(db, reserva)
         elif opcion == "4":
-            eliminar_reserva(db)
+            reserva = pedirIdReserva(db)
+            actualizar_reserva(db, reserva)
         elif opcion == "5":
+            reserva = pedirIdReserva(db)
+            eliminar_reserva(db, reserva)
+        elif opcion == "6":
             break
         else:
-            print("Opción no válida.")
+            print(msj.opcionesError)
