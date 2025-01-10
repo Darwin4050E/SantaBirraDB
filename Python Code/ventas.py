@@ -11,13 +11,13 @@ def restar(db, numero, productoo, cantidadess):
         conection.execute(query2,tupla1)
         db.commit()
         inventario_id = inventario.obtener_ultimo_inventario(db, productoo)
-        nuevo_stock = inventario.consultar_inventario1(db, inventario_id) - int(cantidadess)
-        inventario.actualizarstock_inventario(db, inventario_id, nuevo_stock)
+        nuevo_stock = inventario.consultar_inventario1(db, inventario_id, productoo) - int(cantidadess)
+        inventario.actualizarstock_inventario(db, inventario_id, productoo, nuevo_stock)
 
 def sumar(db, productoo, cantidadess):
         inventario_id = inventario.obtener_ultimo_inventario(db, productoo)
-        nuevo_stock = inventario.consultar_inventario1(db, inventario_id) + int(cantidadess)
-        inventario.actualizarstock_inventario(db, inventario_id, nuevo_stock)
+        nuevo_stock = inventario.consultar_inventario1(db, inventario_id, productoo) + int(cantidadess)
+        inventario.actualizarstock_inventario(db, inventario_id, productoo, nuevo_stock)
 
 def insertar_venta(db):
     conection = db.cursor()
@@ -38,9 +38,14 @@ def insertar_venta(db):
     while pro_eleccion !="N":
         productos.consultar_productos(db)
         producto = input("Ingrese el ID del producto: ")
+        
         cantidad = input("Ingrese la cantidad: ")
-        productoss.append(producto)
-        cantidades.append(cantidad)
+        if producto in productoss:
+            print("Ingrese un producto que no esté en la compra:")
+        else:
+            productoss.append(producto)
+            cantidades.append(cantidad)
+
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
 
     tupla = (numero, fecha, miembro, cliente)

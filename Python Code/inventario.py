@@ -7,7 +7,7 @@ import mensajes as msj
 
 def insert_inventario(db):
 
-    codigoProd = input("Código del producto: ")
+    codigoProd = pedirIdEntero("Código del producto: ")
     if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codigoProd)):
         printMensajeErrorFK()
         return
@@ -25,7 +25,7 @@ def insert_inventario(db):
     db.commit()
     printIngresoExitoso()
 
-#Saca el último ID artifical de la secuencia de inventarios del producto
+#Saca el último ID artificial de la secuencia de inventarios del producto
 def ultimo_IDProducto(db, idProducto):
     conection = db.cursor()
     if existeInventarioProducto(db, idProducto):
@@ -51,16 +51,14 @@ def consultar_inventario(db):
         codigoProd = fila[1]
         fecha = fila[2].strftime("%d/%m/%Y")
         stock = fila[3]
-
-
         print(f"id: {id_inventario} - producto: {codigoProd} - fecha: {fecha} - stock: {stock} ")
 
-def consultar_inventario1(db, id):
+def consultar_inventario1(db, id, procode):
     conection = db.cursor()
-    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s ", (id, ))
+    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s and Pro_Code= %s", (id,procode ))
     datos = conection.fetchall()
     for fila in datos:
-        stock = int(fila[2]) 
+        stock = int(fila[3]) 
         return stock
 
 def obtener_ultimo_inventario(db, codProd):
@@ -76,36 +74,32 @@ def obtener_ultimo_inventario(db, codProd):
 
 def actualizar_inventario(db):
     conection = db.cursor()
-    codigoProd = input("Código del producto: ")
+    codigoProd = pedirIdEntero("Código del producto: ")
     if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codigoProd)):
         printMensajeErrorFK()
         return
     
     inventario = obtener_ultimo_inventario(db, codigoProd)
     if inventario is None:
-        print("No se encontró el producto.")
+        print("No se encontró inventario del producto.")
         return
     
-    stock = input("Ingrese el stock a actualizar: ")
+    stock = pedirEnteroPositivo("Ingrese el nuevo stock del producto: ")
 
     fechaActual = datetime.today().date() 
 
-    query = "UPDATE INVENTORY SET Inv_Stock=%s, Inv_Date=%s WHERE Inv_ID = %s"
-    values = (stock, fechaActual, inventario)
+    query = "UPDATE INVENTORY SET Inv_Stock=%s, Inv_Date=%s WHERE Inv_ID = %s AND Pro_Code = %s"
+    values = (stock, fechaActual, inventario, codigoProd)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ningún producto con ese ID.")
-    else:
-        print(f"Inventario actualizado.")
+    printActualizacionExitosa()
 
-def actualizarstock_inventario(db, id, stock):
+def actualizarstock_inventario(db, id, pro, stock):
     conection = db.cursor()
-    fechaActual = datetime.today().date() 
 
-    query = "UPDATE INVENTORY SET Inv_Stock=%s, Inv_Date=%s WHERE Inv_ID = %s"
-    values = (stock, fechaActual, id)
+    query = "UPDATE INVENTORY SET Inv_Stock=%s WHERE Inv_ID = %s and Pro_code = %s"
+    values = (stock, id, pro)
             
     conection.execute(query, values)
     db.commit()
@@ -117,21 +111,22 @@ def actualizarstock_inventario(db, id, stock):
 def eliminar_inventario(db):
     conection = db.cursor()
     #Se eliminará el último inventario
-    codProd = input("Ingrese el código del producto para eliminar el ultimo inventario: ")
+    codProd = pedirIdEntero("Código del producto: ")
+    if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codProd)):
+        printMensajeErrorFK()
+        return
+    
     inventario = obtener_ultimo_inventario(db, codProd)
     if inventario is None:
-        print("No se encontró el producto.")
+        print("No se encontró inventario del producto.")
         return
 
-    query = "DELETE FROM INVENTORY WHERE Inv_ID=%s"
-    values = (inventario, )
+    query = "DELETE FROM INVENTORY WHERE Inv_ID=%s AND Pro_Code=%s"
+    values = (inventario, codProd)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ningún producto con ese ID")
-    else:
-        print(f"Inventario eliminado.")
+    printEliminacionExitosa()
 
 def menu_crud_inventario(db):
     while True:
@@ -142,8 +137,10 @@ def menu_crud_inventario(db):
         elif opcion == "2":
             consultar_inventario(db)
         elif opcion == "3":
+            consultar_inventario(db)
             actualizar_inventario(db)
         elif opcion == "4":
+            consultar_inventario(db)
             eliminar_inventario(db)
         elif opcion == "5":
             break

@@ -54,9 +54,10 @@ opcionesEmpleado = """
     Seleccione una opción: 
         1. Insertar Empleado.
         2. Consultar Empleados.
-        3. Actualizar Empleado.
-        4. Eliminar Empleado.
-        5. Volver.
+        3. Consultar Empleados por ROL.
+        4. Actualizar Empleado.
+        5. Eliminar Empleado.
+        6. Volver.
     ==========================================
 """
 
@@ -167,7 +168,7 @@ opcionesIncidentes = """
                 Gestión de Incidentes
     ==========================================
     Seleccione una opción:
-        1. Insertar Incidente.
+        1. Insertar Tipo de Incidente.
         2. Agregar Clientes a Incidente.
         3. Consultar Tipos de Incidente.
         4. Consultar Incidentes Ocurridos.
