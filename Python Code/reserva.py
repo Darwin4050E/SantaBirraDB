@@ -11,6 +11,7 @@ def insertar_reserva(db):
     promocion = input("Por favor ingrese el ID de la promoción: ")
     evento = input("Por favor ingrese el ID del evento: ")
     estado = input("Por favor ingrese el ID de estado de la reserva: ")
+    print("Estas son las zonas disponibles: ")
     consultar_zonas(db)
     zona = input("Por favor ingrese el ID de la zona a reservar: ")
     tupla = (fecha, hora, cliente, promotor,promocion, evento, estado)
@@ -73,7 +74,8 @@ def registrar_acompanantes(id_reserva, ids_acompanantes, db):
 
 def consultar_reserva(db):
     conection = db.cursor()
-    conection.execute("SELECT * FROM BOOKING")
+    id_r = input("Ingrese el ID de la reserva que desea consultar: ")
+    conection.execute(f"SELECT * FROM BOOKING WHERE Boo_ID ={id_r}")
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
