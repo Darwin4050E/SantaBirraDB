@@ -7,13 +7,8 @@ def consultar_zonas(db):
     for fila in datos:
         id_zona = fila[0]
         capacidad = int(fila[1])
-        tipo = fila[2]
-        codGuardia = fila[3]
-        if tipo == 'G':
-            tipo = 'General'
-        else:
-            tipo = 'VIP'
-        print(f"id: {id_zona} - capacidad: {capacidad} - tipo: {tipo} - guardia: {codGuardia}")
+        codGuardia = fila[2]
+        print(f"id: {id_zona} - capacidad: {capacidad} - guardia: {codGuardia}")
 
 def actualizar_zonaVIP(db):
     conection = db.cursor()
