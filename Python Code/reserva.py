@@ -1,26 +1,29 @@
 from clientes import insertar_cliente
+from zona import consultar_zonas
 
 def insertar_reserva(db):
     conection = db.cursor()
-    fechaIngresada = input("Por favor ingresa la fecha de la reserva (YYYY-MM-DD): ")
-    fecha = datetime.strptime(fechaIngresada, "%Y-%m-%D").date()
-    horaIngresada = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
-    hora = datetime.strptime(horaIngresada, "%H:%M:%S").time()
+    fecha = input("Por favor ingresa la fecha de la reserva (YYYY-MM-DD): ")
+    hora = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
     cliente = input("Ingrese el ID del cliente que realizó la reserva: ")
     promotor = input("Por favor ingrese el ID del promotor del evento: ")
     promocion = input("Por favor ingrese el ID de la promoción: ")
     evento = input("Por favor ingrese el ID del evento: ")
     estado = input("Por favor ingrese el ID de estado de la reserva: ")
+    consultar_zonas(db)
+    zona = input("Por favor ingrese el ID de la zona a reservar: ")
     tupla = (fecha, hora, cliente, promotor,promocion, evento, estado)
 
     query = "INSERT INTO BOOKING(Boo_Date, Boo_Hour, Cus_ID, Mem_ID, Prom_ID, Eve_ID, Sta_ID) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     conection.execute(query,tupla)
-    db.commit()
-    nro_participantes = input("Ingrese el numero de acompañantes: ")
+    db.commit()    
+    nro_participantes = int(input("Ingrese el numero de acompañantes: "))
+    conection.execute("SELECT LAST_INSERT_ID()")
+    ultimo_id = conection.fetchone()[0]
+    query2 = "INSERT INTO BOOKING_ZONE(Boo_ID, Zon_ID) VALUES (%s, %s)"
+    conection.execute(query2,(ultimo_id, zona))
     if nro_participantes > 0:
         ids_acompanates = lista_acompanantes(nro_participantes)
-        conection.execute("SELECT LAST_INSERT_ID()")
-        ultimo_id = conection.fetchone()[0]
         registrar_acompanantes(ultimo_id, ids_acompanates, db)
 
     print("Reserva ingresada con éxito.")
@@ -45,7 +48,7 @@ def validar_y_registrar_clientes(ids_clientes, db):
     return True
 
 def validar_ID(id_cliente):
-    if id_cliente != 10:
+    if len(id_cliente) != 10:
         print("El ID del cliente no es válido. Debe tener 10 caracteres. Intente nuevamente")
         return False
     return True
@@ -66,7 +69,7 @@ def registrar_acompanantes(id_reserva, ids_acompanantes, db):
         for id_acompanante in ids_acompanantes:
             query = "INSERT INTO BOOKING_CUSTOMER(Boo_ID, Cus_ID) VALUES (%s, %s)"
             conection.execute(query, (id_reserva, id_acompanante))
-        conection.commit()
+        db.commit()
         print("Acompañantes registrados con éxito.")
 
 def consultar_reserva(db):
@@ -75,8 +78,8 @@ def consultar_reserva(db):
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
-        fecha = fila[1].strftime("%Y/%m/%D")
-        hora = fila[2].strftime("%H:%M:%S")
+        fecha = fila[1]
+        hora = fila[2]
         cliente_id = fila[3]
         promotor_id = fila[4]
         promocion_id = fila[5]
@@ -98,41 +101,40 @@ def actualizar_reserva(db):
         """)
         opcion = input("Seleccione una opción: ")
         if opcion == "1":
-            actualizar_fecha(conection,reserva_id)
+            actualizar_fecha(conection,reserva_id,db)
         elif opcion == "2":
-            actualizar_zona(conection,reserva_id)
+            actualizar_zona(conection,reserva_id,db)
         elif opcion == "3":
-            actualizar_estado(conection,reserva_id)
+            actualizar_estado(conection,reserva_id,db)
         elif opcion == "4":
-            actualizar_promocion(conection,reserva_id)
+            actualizar_promocion(conection,reserva_id,db)
         elif opcion == "5":
             break
         else:
             print("Opción no válida.")
 
-def actualizar_fecha(conection,reserva_id):
+def actualizar_fecha(conection,reserva_id,db):
     fecha = input("Ingrese la nueva fecha de la reserva (YYYY-MM-DD): ")
-    nueva_fecha = datetime.strptime(fecha, "%Y-%m-%D").date()
     query = "UPDATE BOOKING SET Boo_Date=%s WHERE Boo_ID=%s"
-    values = (nueva_fecha, reserva_id)
+    values = (fecha, reserva_id)
     conection.execute(query, values)
-    conection.commit()
+    db.commit()
     print("Fecha actualizada!")
 
-def actualizar_zona(conection, reserva_id):
+def actualizar_zona(conection, reserva_id,db):
     zona = input("Ingrese el ID de la zona nueva de la reserva: ")
     query = "UPDATE BOOKING_ZONE SET Zon_ID=%s WHERE Boo_ID=%s"
     values = (zona, reserva_id)
     conection.execute(query, values)
-    conection.commit()
+    db.commit()
     print("Zona actualizada!")
 
-def actualizar_estado(conection, reserva_id):
+def actualizar_estado(conection, reserva_id,db):
     estado = input("Ingrese el ID del estado nuevo de la reserva: ")
     query = "UPDATE BOOKING SET Sta_ID=%s WHERE Boo_ID=%s"
     values = (estado, reserva_id)
     conection.execute(query, values)
-    conection.commit()
+    db.commit()
     print("Estado actualizado!")
 
 def actualizar_promocion(conection, reserva_id):
@@ -140,7 +142,7 @@ def actualizar_promocion(conection, reserva_id):
     query = "UPDATE BOOKING SET Prom_ID=%s WHERE Boo_ID=%s"
     values = (promocion, reserva_id)
     conection.execute(query, values)
-    conection.commit()
+    db.commit()
     print("Promoción actualizada!")
 
 def eliminar_reserva(db):
@@ -151,6 +153,12 @@ def eliminar_reserva(db):
     values = (reserva_id, )
     conection.execute(query, values)
 
+    
+    if conection.rowcount == 0:
+        print("No se encontró ninguna reserva con ese ID.")
+    else:
+        print(f"Reserva {reserva_id} eliminada.")
+
     query2 = "DELETE FROM PAY WHERE Boo_ID=%s"
     conection.execute(query2, values)
 
@@ -158,10 +166,6 @@ def eliminar_reserva(db):
     conection.execute(query3, values)
 
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ninguna reserva con ese ID.")
-    else:
-        print(f"Reserva eliminada.")
 
 def menu_crud_reservas(db):
     while True:
