@@ -14,13 +14,14 @@ from reserva import *
 from objetosPerdidos import *
 from incidente import *
 from compras import *
+from inputHelper import *
 
 import mensajes as msj
 
 def menu_principal(db):
     while(True):
         print(msj.opcionesMenu)
-        opcion = int(input("Seleccione una opción: "))
+        opcion = pedirNatural("Seleccione una opción: ")
         if opcion == 1:
             menu_crud_clientes(db)
         elif opcion == 2:

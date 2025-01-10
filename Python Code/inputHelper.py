@@ -19,6 +19,13 @@ def pedirDecimalPositivo(mensaje):
         numero = input(mensaje)
     return float(numero)
 
+def pedirPorcentaje(mensaje):
+    numero = input(mensaje)
+    while(not (numero.replace(".","").isdigit() and 0 <= float(numero) <= 1)):
+        print("Ingrese un porcentaje válido.")
+        numero = input(mensaje)
+    return float(numero)
+
 def pedirCedula(mensaje):
     cedula = input(mensaje)
     while(not cedula.isdigit() or len(cedula) != 10):
@@ -56,6 +63,13 @@ def pedirApellido(mensaje):
     return nombre
 
 def pedirNombreEmpresa(mensaje):
+    nombre = input(mensaje)
+    while(len(nombre) < 2):
+        print("Ingrese un nombre válido.")
+        nombre = input(mensaje)
+    return nombre
+
+def pedirNombreConSignos(mensaje):
     nombre = input(mensaje)
     while(len(nombre) < 2):
         print("Ingrese un nombre válido.")
@@ -104,6 +118,13 @@ def pedirDescripcion(mensaje):
     descripcion = input(mensaje)
     while len(descripcion) < 5:
         print("Ingrese una descripción válida.")
+        descripcion = input(mensaje)
+    return descripcion
+
+def pedirUnidadMedidad(mensaje):
+    descripcion = input(mensaje)
+    while not (descripcion[:-2].isdigit() and descripcion[-2:].isalpha() and len(descripcion) > 2):
+        print("Ingrese una unidad válida junto con su valor numérico (ejemplo: 15ml).")
         descripcion = input(mensaje)
     return descripcion
 

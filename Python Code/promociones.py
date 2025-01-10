@@ -1,15 +1,18 @@
 import mensajes as msj
+from inputHelper import *
+from outputHelper import *
+from validadorFK import *
 
 def insert_promociones(db):
-    nombrePromocion = input("Nombre de la promoción: ")
-    descuento = input("Descuento asociado a la promoción (0.xx): ")
+    nombrePromocion = pedirNombreConSignos("Nombre de la promoción: ")
+    descuento = pedirPorcentaje("Descuento asociado a la promoción (0.xx): ")
 
     conection = db.cursor()
     tupla = (nombrePromocion, descuento)
     sql = "INSERT INTO PROMOTION (Prom_Name, Prom_Descuento) VALUES (%s, %s) "
     conection.execute(sql,tupla)
     db.commit()
-    print("Promoción agregada con éxito.")
+    printIngresoExitoso()
 
 def consultar_promociones(db):
     conection = db.cursor()
@@ -22,34 +25,37 @@ def consultar_promociones(db):
         print(f"id: {id} - nombre: {nombre} - descuento: {descuento}")
 
 def actualizar_promocion(db):
+    consultar_promociones(db)
     conection = db.cursor()
-    codProm = input("Ingrese el ID de la promoción: ")
-    nombrePromocion = input("Nombre de la promoción actualizado: ")
-    descuento = input("Descuento asociado a la promoción actualizado (0.xx): ")
+    codProm = pedirEnteroPositivo("Ingrese el ID de la promoción: ")
+    if not validar_clave_foranea(db, "PROMOTION", "Prom_ID", codProm):
+        printMensajeErrorFK()
+        return
+    
+    nombrePromocion = pedirNombreConSignos("Nombre de la promoción actualizado: ")
+    descuento = pedirPorcentaje("Descuento asociado a la promoción actualizado (0.xx): ")
 
     query = "UPDATE PROMOTION SET Prom_Name=%s, Prom_Descuento=%s WHERE Prom_ID = %s"
     values = (nombrePromocion, descuento, codProm)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ninguna promoción con ese ID.")
-    else:
-        print(f"Promoción actualizado.")
+    printActualizacionExitosa()
 
 def eliminar_promocion(db):
+    consultar_promociones(db)
     conection = db.cursor()
-    codProm = input("Ingrese el ID de la promoción: ")
+    codProm = pedirEnteroPositivo("Ingrese el ID de la promoción: ")
+    if not validar_clave_foranea(db, "PROMOTION", "Prom_ID", codProm):
+        printMensajeErrorFK()
+        return
 
     query = "DELETE FROM PROMOTION WHERE Prom_ID=%s"
     values = (codProm, )
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ninguna promoción con ese ID")
-    else:
-        print(f"Promoción eliminada.")
+    printEliminacionExitosa()
 
 def menu_crud_promociones(db):
     while True:

@@ -40,7 +40,7 @@ def ingresarPorRol(db, conection, rol, cedula):
         insertar_miembro(db, conection, "GUARD", cedula)
 
     elif rol == "P":
-        comision = pedirDecimalPositivo("Comisión del promotor: ")
+        comision = pedirPorcentaje("Comisión del promotor: ")
         manager = pedirManager(db)
 
         sql = "INSERT INTO PROMOTOR (Mem_ID, Prom_com, Mem_Man) VALUES (%s,%s,%s)"
