@@ -98,9 +98,9 @@ def pedirRUC(mensaje):
     return ruc
 
 def pedirEntreDosOpciones(mensajeOpciones, opcionUno, opcionDos):
-    print(f"\n{mensajeOpciones}.\n1. {opcionUno}.\n2. {opcionDos}.")
+    print(f"\n{mensajeOpciones}:\n  1. {opcionUno}.\n  2. {opcionDos}.")
     opciones = [1,2]
-    opcion = input("Ingrese una opción: ")
+    opcion = input("\nIngrese una opción: ")
     while ((not opcion.isdigit()) or (int(opcion) not in opciones)):
         print("Ingrese una opción válida.")
         opcion = input("Ingrese una opción: ")

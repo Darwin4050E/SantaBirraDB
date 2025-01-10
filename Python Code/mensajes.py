@@ -271,6 +271,16 @@ opcionesActualizacionCommpra = """
     ==========================================
 """
 
+opcionesFecha = """
+    ==========================================
+                Ingreso de fecha
+    ==========================================
+    Seleccione una opción:
+        1. Fecha de compra.
+        2. Cantidad de producto comprada.
+    ==========================================
+"""
+
 opcionesError = """Opción no válida."""
 
 rendimientoEventos = """

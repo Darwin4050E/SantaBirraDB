@@ -13,7 +13,7 @@ def getFechaActual():
 
 def getFechaUsuario():
     while True:
-        fechaIngresada = input("Fecha (YYYY-MM-DD): ")
+        fechaIngresada = input("\nIngrese la fecha fecha en el formato [YYYY-MM-DD]: ")
         try:
             fecha = datetime.strptime(fechaIngresada, "%Y-%m-%d").date()
             return fecha

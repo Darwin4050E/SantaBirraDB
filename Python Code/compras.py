@@ -238,7 +238,6 @@ def eliminarCompra(db):
     
     codigoCompra, rucProveedor, codigoProducto = solicitarDatosCompraAvanzados(db)
         
-    # primeraQuery = f'SELECT Bill_Quantity, Bill_Date FROM Product_Supplier WHERE Bill_ID = {codigoCompra} AND Sup_RUC = {rucProveedor} AND Pro_Code = {codigoProducto}'
     primeraQuery = '''
         SELECT Bill_Date, Bill_Quantity
         FROM Product_Supplier
@@ -253,7 +252,6 @@ def eliminarCompra(db):
         cursor = db.cursor()
         cursor.execute(primeraQuery, (codigoCompra, rucProveedor, codigoProducto))
         datos = cursor.fetchall()
-        # segundaQuery = f'UPDATE Inventory SET Inv_Stok = Inv_Stock - {datos[0][1]} WHERE Pro_Code = {codigoProducto} AND Bill_Date = {datos[0][0]}'
         segundaQuery = '''
             UPDATE Inventory
             SET Inv_Stock = Inv_Stock - %s

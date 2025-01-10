@@ -52,8 +52,7 @@ def menu_principal(db):
         elif opcion == 14:
             menu_crud_objetosperdidos(db)
         elif opcion == 15:
-            #menu_crud_reportes(db)
-            print("Funcionalidad no implementada.")
+            menu_crud_reportes(db)
         elif opcion == 16:
             break
         else:
