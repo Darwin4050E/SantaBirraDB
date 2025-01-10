@@ -3,3 +3,9 @@ def printMensajeErrorFK():
 
 def printIngresoExitoso():
     print("Registro agregado éxitosamente.")
+
+def printActualizacionExitosa():
+    print("Registro actualizado éxitosamente.")
+
+def printEliminacionExitosa():
+    print("Registro eliminado éxitosamente.")

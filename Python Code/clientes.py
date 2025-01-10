@@ -1,45 +1,56 @@
 import mensajes as msj
+from validadorFK import *
+from inputHelper import *
+from outputHelper import *
 
 def insertar_cliente(db):
-     cedula = input("Cédula: ")
-     nombre = input("Nombre: ")
-     apellido = input("Apellido: ")
-     correo = input("Correo: ")
-     celular = input("Celular: ")
-     sexo = input("Sexo (M-F): ")
-     conection = db.cursor()
-     tupla = (cedula, nombre, apellido, celular, correo, sexo)
-     sql = "INSERT INTO CUSTOMER (Cus_ID, Cus_FName, Cus_LName, Cus_Phone, Cus_Email, Cus_Sex) VALUES (%s, %s, %s, %s, %s, %s)" 
-     conection.execute(sql,tupla)
-     db.commit()
-     print(f"Cliente {nombre} {apellido} agregado.")
+    cedula = pedirCedula("Cédula: ")
+    nombre = pedirNombre("Nombre: ")
+    apellido = pedirApellido("Apellido: ")
+    correo = pedirCorreo("Correo: ")
+    celular = pedirTelefono("Celular: ")
+    sexo = pedirSexo("Sexo (M/F): ")
+
+    conection = db.cursor()
+    tupla = (cedula, nombre, apellido, celular, correo, sexo)
+    sql = "INSERT INTO CUSTOMER (Cus_ID, Cus_FName, Cus_LName, Cus_Phone, Cus_Email, Cus_Sex) VALUES (%s, %s, %s, %s, %s, %s)" 
+    conection.execute(sql,tupla)
+    db.commit()
+    printIngresoExitoso()
 
 def consultar_clientes(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM CUSTOMER")
     datos = conection.fetchall()
-    for i in datos:
-      print(i)
+    for fila in datos:
+        cedula = fila[0]
+        nombre = fila[1]
+        apellido = fila[2]
+        celular = fila[3]
+        correo = fila[4]
+        sexo = fila[5]
+        print(f"id: {cedula} - nombre: {nombre} - apellido: {apellido} - correo: {correo} - celular: {celular} - sexo: {sexo}")
 
 def actualizar_cliente(db):
     conection = db.cursor()
-    cedula = input("Ingrese la cédula del cliente a actualizar: ")
-    telefono = input("Ingrese el teléfono actualizado: ")
-    email = input("Ingrese el e-mail actualizado: ")
+    cedula = pedirCedula("Cédula: ")
+    if not validar_clave_foranea(db, "CUSTOMER", "Cus_ID", cedula):
+        printMensajeErrorFK()
+        return
+
+    celular = pedirTelefono("Celular actualizado: ")
+    correo = pedirCorreo("Correo actualizado: ")
 
     query = "UPDATE CUSTOMER SET Cus_Phone=%s, Cus_email=%s WHERE Cus_ID=%s"
-    values = (telefono, email, cedula)
+    values = (celular, correo, cedula)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ningún cliente con ese ID.")
-    else:
-      print(f"Cliente actualizado.") 
+    printActualizacionExitosa()
 
 def eliminar_cliente(db):
     conection = db.cursor()
-    cedula = input("Ingrese la cédula del cliente a eliminar: ")
+    cedula = pedirCedula("Cédula: ")
 
     query = "DELETE FROM CUSTOMER WHERE Cus_ID=%s"
     values = (cedula,)
@@ -47,9 +58,9 @@ def eliminar_cliente(db):
     conection.execute(query, values)
     db.commit()
     if conection.rowcount == 0:
-        print("No se encontró ningún cliente con ese ID.")
+        printMensajeErrorFK()
     else:
-        print(f"Cliente eliminado.")
+        printEliminacionExitosa()
 
 def menu_crud_clientes(db):
     while True:
@@ -60,8 +71,10 @@ def menu_crud_clientes(db):
         elif opcion == "2":
             consultar_clientes(db)
         elif opcion == "3":
+            consultar_clientes(db)
             actualizar_cliente(db)   
         elif opcion == "4":
+            consultar_clientes(db)
             eliminar_cliente(db)
         elif opcion == "5":
             break

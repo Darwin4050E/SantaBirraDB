@@ -1,7 +1,8 @@
 from datetime import datetime
+from inputHelper import *
 
 def getFecha():
-    opcion = pedirOpcionFecha()
+    opcion = pedirEntreDosOpciones("Opciones para la fecha", "Seleccionar Fecha Actual", "Ingresar Fecha")
     if opcion == 1:
         return getFechaActual()
     elif opcion == 2:
@@ -18,12 +19,3 @@ def getFechaUsuario():
             return fecha
         except ValueError:
             print("Fecha inválida. Por favor, ingrese una fecha en el formato YYYY-MM-DD.")
-
-def pedirOpcionFecha():
-    print("\nOpciones para la fecha.\n1. Seleccionar Fecha Actual.\n2. Ingresar Fecha.")
-    opciones = [1,2]
-    opcion = input("Ingrese una opción: ")
-    while ((not opcion.isdigit()) or (int(opcion) not in opciones)):
-        print("Ingrese una opción válida")
-        opcion = input("Ingrese una opción: ")
-    return int(opcion)
