@@ -51,8 +51,6 @@ def consultar_inventario(db):
         codigoProd = fila[1]
         fecha = fila[2].strftime("%d/%m/%Y")
         stock = fila[3]
-
-
         print(f"id: {id_inventario} - producto: {codigoProd} - fecha: {fecha} - stock: {stock} ")
 
 def consultar_inventario1(db, id):

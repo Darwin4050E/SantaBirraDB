@@ -1,43 +1,53 @@
 import mensajes as msj
+from inputHelper import *
+from outputHelper import *
+from validadorFK import *
 
 def insertar_proveedor(db):
-    cedula = input("Ingrese el RUC del proveedor: ")
-    nombre = input("Ingrese el nombre: ")
-    celular = input("Ingrese el celular: ")
-    correo = input("Ingrese el correo: ")
+    ruc = pedirRUC("RUC del proveedor: ")
+    nombre = pedirNombreEmpresa("Nombre del proveedor: ")
+    celular = pedirTelefonoConvencional("Teléfono del proveedor: ")
+    correo = pedirCorreo("Correo del proveedor: ")
+
     conection = db.cursor()
-    tupla = (cedula, nombre, celular, correo)
+    tupla = (ruc, nombre, celular, correo)
     sql = "INSERT INTO SUPPLIER (Sup_RUC, Sup_Name, Sup_Phone, Sup_Email) VALUES (%s, %s, %s, %s)" 
     conection.execute(sql,tupla)
     db.commit()
-    print(f"Proveedor {nombre} agregado.")
+    printIngresoExitoso()
 
 def consultar_proveedores(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM SUPPLIER")
     datos = conection.fetchall()
-    for i in datos:
-        print(i)
+    for fila in datos:
+        cedula = fila[0]
+        nombre = fila[1]
+        celular = fila[2]
+        correo = fila[3]
+        print(f"RUC: {cedula} - Nombre: {nombre} - Teléfono: {celular} - Correo: {correo}")
 
 def actualizar_proveedor(db):
     conection = db.cursor()
-    cedula = input("Ingrese el RUC  del proveedor a actualizar: ")
-    telefono = input("Ingrese el teléfono actualizado: ")
-    email = input("Ingrese el e-mail actualizado: ")
+    ruc = pedirRUC("RUC del proveedor: ")
+    if not validar_clave_foranea(db, "SUPPLIER", "Sup_RUC", ruc):
+        printMensajeErrorFK()
+        return
+    
+    nombre = pedirNombreEmpresa("Nombre del proveedor actualizado: ")
+    celular = pedirTelefonoConvencional("Celular actualizado: ")
+    correo = pedirCorreo("Correo actualizado: ")
 
-    query = "UPDATE SUPPLIER SET Sup_Phone=%s, Sup_email=%s WHERE Sup_RUC=%s"
-    values = (telefono, email, cedula)
+    query = "UPDATE SUPPLIER SET Sup_Name=%s,Sup_Phone=%s, Sup_email=%s WHERE Sup_RUC=%s"
+    values = (nombre,celular, correo, ruc)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ningún cliente con ese ID.")
-    else:
-        print(f"Cliente actualizado.")    
+    printActualizacionExitosa()
 
 def eliminar_proveedor(db):
     conection = db.cursor()
-    ruc = input("Ingrese el RUC del proveedor a eliminar: ")
+    ruc = pedirRUC("RUC del proveedor: ")
 
     query = "DELETE FROM SUPPLIER WHERE Sup_RUC=%s"
     values = (ruc,)
@@ -45,9 +55,9 @@ def eliminar_proveedor(db):
     conection.execute(query, values)
     db.commit()
     if conection.rowcount == 0:
-        print("No se encontró ningún cliente con ese ID.")
+        printMensajeErrorFK()
     else:
-        print(f"Proveedor eliminado eliminado.")
+        printEliminacionExitosa()
 
 def menu_crud_proveedores(db):
     while True:
@@ -58,8 +68,10 @@ def menu_crud_proveedores(db):
         elif opcion == "2":
             consultar_proveedores(db) 
         elif opcion == "3":
+            consultar_proveedores(db)
             actualizar_proveedor(db)    
         elif opcion == "4":
+            consultar_proveedores(db)
             eliminar_proveedor(db)
         elif opcion == "5":
             break

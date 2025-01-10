@@ -1,80 +1,163 @@
 import mensajes as msj
+from inputHelper import *
+from outputHelper import *
+from validadorFK import *
 
-def insertar_miembro(db):
-     cedula = input("Ingresa la cédula del empleado: ")
-     nombre = input("Ingresa el nombre del empleado: ")
-     apellido = input("Ingresa el apellido del empleado: ")
-     experiencia = int(input("Ingresa la experiencia del empleado: "))
-     rol = input("Ingresa el rol \nG- si es guarida\nP si es promotor\nS si es vendedor\nM si es manager:")
-     while rol not in ["G", "P", "S", "M"]:
-         rol = input("Ingresa el rol \nG- si es guarida\nP si es promotor\nS si es vendedor\nM si es manager:")
-     conection = db.cursor()
-     tupla = (cedula, nombre, apellido, experiencia, rol)
-     sql = "INSERT INTO MEMBER (Mem_ID, Mem_FName, Mem_LName, Mem_experience, Mem_rol) VALUES (%s, %s, %s, %s, %s)" 
-     conection.execute(sql,tupla)
-     db.commit()
-     if rol == "G":
-         sql1 = "INSERT INTO GUARD (Mem_ID) VALUES (%s)"
-         tupla1 = (cedula,)
-         conection.execute(sql1,tupla1)
-         db.commit()
-     elif rol == "P":
-         comision = input("Ingresa la comisión: ")
-         manger = input("Ingresa el ID del manager: ")
-         sql1 = "INSERT INTO PROMOTOR (Mem_ID, Prom_com, Mem_MAn) VALUES (%s,%s,%s)"
-         tupla1 = (cedula, comision, manger)
-         conection.execute(sql1,tupla1)
-         db.commit()
-     elif rol == "S":
-         sql1 = "INSERT INTO SELLER (Mem_ID) VALUES (%s)"
-         tupla1 = (cedula,)
-         conection.execute(sql1,tupla1)
-         db.commit()
-     else:
-         sql1 = "INSERT INTO MANAGER (Mem_ID) VALUES (%s)"
-         tupla1 = (cedula,)
-         conection.execute(sql1,tupla1)
-         db.commit()
+def crear_miembro(db):
+    cedula = pedirCedula("Cédula del empleado: ")
+    nombre = pedirNombre("Nombre del empleado: ")
+    apellido = pedirApellido("Apellido del empleado: ")
+    experiencia = pedirEnteroPositivo("Experiencia del empleado en años: ")
+    rol = pedirRol()
+
+    conection = db.cursor()
+    tupla = (cedula, nombre, apellido, experiencia)
+    sql = "INSERT INTO MEMBER (Mem_ID, Mem_FName, Mem_LName, Mem_Experience) VALUES (%s, %s, %s, %s)" 
+    conection.execute(sql,tupla)
+    db.commit()
+
+    ingresarPorRol(db, conection, rol, cedula)
+
+    printIngresoExitoso()
 
   
-                 
-     print(f"Empleado {nombre} {apellido} agregado.")
+def pedirRol():
+    roles = ["G","P","S","M"]
+    print("\nOpciones de rol.\nG - Guardia.\nP - Promotor.\nS - Vendedor\nM - Manager")
+    rol = input("Rol: ")
+    while rol not in roles:
+        print("Ingrese un rol válido.")
+        rol = input("Rol: ")
+    return rol
+
+def ingresarPorRol(db, conection, rol, cedula):
+    if rol == "G":
+        insertar_miembro(db, conection, "GUARD", cedula)
+
+    elif rol == "P":
+        comision = pedirDecimalPositivo("Comisión del promotor: ")
+        manager = pedirManager(db)
+
+        sql = "INSERT INTO PROMOTOR (Mem_ID, Prom_com, Mem_Man) VALUES (%s,%s,%s)"
+        tupla = (cedula, comision, manager)
+        conection.execute(sql, tupla)
+        db.commit()
+
+    elif rol == "S":
+        insertar_miembro(db, conection, "SELLER", cedula)
+
+    else:
+        insertar_miembro(db, conection, "MANAGER", cedula)
+
+def insertar_miembro(db, conection, miembro, cedula):
+    query = "INSERT INTO {} (Mem_ID) VALUES (%s)".format(miembro)
+    tupla = (cedula,)
+    conection.execute(query, tupla)
+    db.commit()
+
+def pedirManager(db):
+    opcion = pedirEntreDosOpciones("Opciones para Manager", "No asignar Manager", "Ingresar Manager")
+    if opcion == 1:
+        return None
+    else:
+        consultar_empleadosPorRol(db, "MANAGER")
+        manager = pedirCedula("Cédula del manager: ")
+        while not validar_clave_foranea(db, "MEMBER", "Mem_ID", manager):
+            printMensajeErrorFK()
+            manager = pedirCedula("Cédula del manager: ")
+        return manager
+
+def obtenerRol(db, cedula):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM MEMBER WHERE Mem_ID=%s", (cedula,))
+    datos = conection.fetchone()
+    cedula = datos[0]
+    rol = None
+
+    if validar_clave_foranea(db, "GUARD", "Mem_ID", cedula):
+        rol = "Guardia"
+    elif validar_clave_foranea(db, "PROMOTOR", "Mem_ID", cedula):
+        rol = "Promotor"
+    elif validar_clave_foranea(db, "SELLER", "Mem_ID", cedula):
+        rol = "Vendedor"
+    else:
+        rol = "Manager"
+    return rol
 
 def consultar_empleados(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM MEMBER")
     datos = conection.fetchall()
-    for i in datos:
-      print(i)
+    for fila in datos:
+        cedula = fila[0]
+        nombre = fila[1]
+        apellido = fila[2]
+        experiencia = fila[3]
+        print(f"Cédula: {cedula}, Nombre: {nombre}, Apellido: {apellido}, Experiencia: {experiencia}")
+
+#Consulta empleados de un rol específico
+def consultar_empleadosPorRol(db, rol):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM MEMBER WHERE Mem_ID IN (SELECT Mem_ID FROM {})".format(rol))
+    datos = conection.fetchall()
+    for fila in datos:
+        cedula = fila[0]
+        nombre = fila[1]
+        apellido = fila[2]
+        experiencia = fila[3]
+        print(f"Cédula: {cedula}, Nombre: {nombre}, Apellido: {apellido}, Experiencia: {experiencia}, Rol: {rol}")
+
+def consultarPorRol(db):
+
+    rol = pedirRol()
+
+    if rol == "G":
+        consultar_empleadosPorRol(db, "GUARD")
+
+    elif rol == "P":
+        consultar_empleadosPorRol(db, "PROMOTOR")
+
+    elif rol == "S":
+        consultar_empleadosPorRol(db, "SELLER")
+
+    else:
+        consultar_empleadosPorRol(db, "MANAGER")
+
+def consultarEmpleadosPorRolBucle(db):
+    continuar = input("\n¿Desea consultar empleados? Presione s para continuar o cualquier letra para salir: ")
+    while continuar == "s" or continuar == "S":
+        consultarPorRol(db)
+        continuar = input("\n¿Desea consultar empleados? Presione s para continuar o cualquier letra para salir: ")
 
 def actualizar_empleado(db):
     conection = db.cursor()
-    cedula = input("Ingrese la cédula del empleado a actualizar: ")
-    experiencia = input("Ingrese la experiencia actualizada: ")
+    cedula = pedirCedula("Cédula del empleado: ")
+    if not validar_clave_foranea(db, "MEMBER", "Mem_ID", cedula):
+        printMensajeErrorFK()
+        return
+    
+    experiencia = pedirEnteroPositivo("Experiencia en años actualizada: ")
 
     query = "UPDATE MEMBER SET Mem_experience=%s WHERE Mem_ID=%s"
     values = (experiencia, cedula)
             
     conection.execute(query, values)
     db.commit()
-    if conection.rowcount == 0:
-        print("No se encontró ningún empleado con ese ID.")
-    else:
-      print(f"empleado actualizado.") 
+    printActualizacionExitosa()
 
 def eliminar_empleado(db):
     conection = db.cursor()
-    cedula = input("Ingrese la cédula del empleado a eliminar: ")
+    cedula = pedirCedula("Cédula del empleado: ")
 
     query = "DELETE FROM MEMBER WHERE Mem_ID=%s"
-    values = (cedula,)
+    values = (cedula, )
             
     conection.execute(query, values)
     db.commit()
     if conection.rowcount == 0:
-        print("No se encontró empleado con ese ID.")
+        printMensajeErrorFK()
     else:
-        print(f"Empleado eliminado.")
+        printEliminacionExitosa()
 
 
 def menu_crud_empleados(db):
@@ -82,14 +165,18 @@ def menu_crud_empleados(db):
         print(msj.opcionesEmpleado)
         opcion = input("Seleccione una opción: ")  
         if opcion == "1":
-            insertar_miembro(db)
+            crear_miembro(db)
         elif opcion == "2":
             consultar_empleados(db)
         elif opcion == "3":
-            actualizar_empleado(db)   
+            consultarEmpleadosPorRolBucle(db)
         elif opcion == "4":
-            eliminar_empleado(db)
+            consultar_empleados(db)
+            actualizar_empleado(db) 
         elif opcion == "5":
+            consultar_empleados(db)
+            eliminar_empleado(db)
+        elif opcion == "6":
             break
         else:
             print(msj.opcionesError)
