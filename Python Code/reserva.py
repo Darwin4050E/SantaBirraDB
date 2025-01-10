@@ -1,10 +1,12 @@
 import datetime
 from clientes import insertar_cliente
 from zona import consultar_zonas
+from inputHelper import *
+from fechaHelper import *
 
 def insertar_reserva(db):
     conection = db.cursor()
-    fecha = input("Por favor ingresa la fecha de la reserva (YYYY-MM-DD): ")
+    fecha = getFecha()
     hora = input("Por favor ingresa la hora de la reserva (HH:mm:ss): ")
     cliente = input("Ingrese el ID del cliente que realizó la reserva: ")
     promotor = input("Por favor ingrese el ID del promotor del evento: ")

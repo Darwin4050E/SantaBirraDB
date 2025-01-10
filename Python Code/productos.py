@@ -74,15 +74,16 @@ def consultar_productosConInventario(db):
 
 def consultar_productosSinInventario(db):
     conection = db.cursor()
-    conection.execute("SELECT * FROM PRODUCT")
+    conection.execute("SELECT * FROM PRODUCT NATURAL JOIN CATEGORYPROD")
     datos = conection.fetchall()
     for fila in datos:
-        id_producto = fila[0]
-        nombre = fila[1]
-        precio = float(fila[2]) 
-        idCategoria = fila[3]
+        id_categoria = fila[0]
+        id_producto = fila[1]
+        nombre = fila[2]
+        precio = fila[3] 
         unidad = fila[4]
-        print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - idCategoria: {idCategoria} - unidad: {unidad}" ) 
+        categoriaNombre = fila[5]
+        print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - unidad: {unidad} - idCategoria: {id_categoria} - categoria: {categoriaNombre}") 
 
 def consultar_UnSoloProducto(db, id):
     conection = db.cursor()

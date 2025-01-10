@@ -10,20 +10,21 @@ opcionesMenu = """
         5. Gestión de Empleados.
         6. Gestión de Ventas.
         7. Gestión de Inventario.
-        8. Gestión de Reservas.
-        9. Gestión de Promociones.
-        10. Gestión de Pagos.
-        11. Gestión de Zonas.
-        12. Gestión de Incidentes.
-        13. Gestión de Objetos Perdidos.
-        14. Generar Reportes.
-        15. Salir.
+        8. Gestión de Eventos.
+        9. Gestión de Reservas.
+        10. Gestión de Promociones.
+        11. Gestión de Pagos.
+        12. Gestión de Zonas.
+        13. Gestión de Incidentes.
+        14. Gestión de Objetos Perdidos.
+        15. Generar Reportes.
+        16. Salir.
     ==========================================
 """
 
 opcionesCliente = """
     ==========================================
-               Gestión de clientes
+               Gestión de Clientes
     ==========================================
     Seleccione una opción: 
         1. Insertar Cliente.
@@ -36,7 +37,7 @@ opcionesCliente = """
 
 opcionesProveedor = """
     ==========================================
-               Gestión de proveedores
+               Gestión de Proveedores
     ==========================================
     Seleccione una opción: 
         1. Insertar Proveedor.
@@ -49,7 +50,7 @@ opcionesProveedor = """
 
 opcionesEmpleado = """
     ==========================================
-               Gestión de empleados
+               Gestión de Empleados
     ==========================================
     Seleccione una opción: 
         1. Insertar Empleado.
@@ -63,7 +64,7 @@ opcionesEmpleado = """
 
 opcionesProducto = """
     ==========================================
-               Gestión de productos
+               Gestión de Productos
     ==========================================
     Seleccione una opción:
         1. Insertar Producto.
@@ -74,9 +75,22 @@ opcionesProducto = """
     ==========================================
 """
 
+opcionesEvento = """
+    ==========================================
+               Gestión de Eventos
+    ==========================================
+    Seleccione una opción:
+        1. Insertar Evento.
+        2. Consultar Eventos.
+        3. Actualizar Evento.
+        4. Eliminar Evento.
+        5. Volver.
+    ==========================================
+"""
+
 opcionesReporte = """
     ==========================================
-              Generación de reportes
+              Generación de Reportes
     ==========================================
     Seleccione una opción:
         1. Reporte de Ventas.
@@ -88,7 +102,7 @@ opcionesReporte = """
 
 opcionesVenta = """
     ==========================================
-                Gestión de ventas
+                Gestión de Ventas
     ==========================================
     Seleccione una opción:
         1. Insertar Venta.
