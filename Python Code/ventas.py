@@ -3,6 +3,11 @@ import clientes
 import productos
 import productos
 import inventario
+from inputHelper import *
+from outputHelper import *
+from validadorFK import *
+from fechaHelper import *
+from miembros import *
 
 def restar(db, numero, productoo, cantidadess):
         conection = db.cursor()
@@ -21,27 +26,24 @@ def sumar(db, productoo, cantidadess):
 
 def insertar_venta(db):
     conection = db.cursor()
-    numero = input("Por favor ingresa el número de venta:")
-    fecha = input("Por favor ingresa la fecha de la venta (YYYY-MM-DD): ")
+    numero = pedirIdEntero("Número de la venta: ")
+    if validar_clave_foranea(db, "SALE", "Sal_ID", numero):
+        printMensajeIngresoExistente()
+        return
+    
+    fecha = getFecha()
 
-    vendedores = "SELECT * FROM SELLER JOIN MEMBER USING(MEM_ID)"
-    conection.execute(vendedores)
-    datos = conection.fetchall()
-    for i in datos:
-      print(i)
-    miembro = input("Ingresa el ID del vendedor: ")
-    clientes.consultar_clientes(db)
-    cliente = input("Ingresa la cedula del comprador: ")
+    miembro = pedirVendedor(db)
+    cliente = pedirCliente(db)
     pro_eleccion = ""
     productoss = []
     cantidades = []
     while pro_eleccion !="N":
-        productos.consultar_productos(db)
-        producto = input("Ingrese el ID del producto: ")
+        producto = pedirProducto(db)
         
-        cantidad = input("Ingrese la cantidad: ")
+        cantidad = pedirNatural("Cantidad: ")
         if producto in productoss:
-            print("Ingrese un producto que no esté en la compra:")
+            print("Ingrese un producto que no esté en la compra.")
         else:
             productoss.append(producto)
             cantidades.append(cantidad)
@@ -56,6 +58,39 @@ def insertar_venta(db):
         productoo, cantidadess = productoss[i], cantidades[i]
         restar(db, numero, productoo, cantidadess)
 
+def pedirVendedor(db):
+    print("\nVendedores disponibles: ")
+    consultar_empleadosPorRol(db, "SELLER")
+    vendedor = pedirCedula("Cédula del vendedor: ")
+    while not validar_clave_foranea(db, "SELLER", "Mem_ID", vendedor):
+        print("Ingrese un vendedor válido.")
+        vendedor = pedirCedula("Cédula del vendedor: ")
+    return vendedor
+
+def pedirCliente(db):
+    print("\nClientes disponibles: ")
+    clientes.consultar_clientes(db)
+    cliente = pedirCedula("Cédula del cliente: ")
+    while not validar_clave_foranea(db, "CUSTOMER", "CUS_ID", cliente):
+        print("Ingrese un cliente válido.")
+        cliente = pedirCedula("Cédula del cliente: ")
+    return cliente
+
+def pedirProducto(db):
+    print("\nProductos disponibles: ")
+    productos.consultar_productosSinInventario(db)
+    producto = pedirIdEntero("ID del producto: ")
+    while not validar_clave_foranea(db, "PRODUCT", "Pro_code", producto):
+        print("Ingrese un producto válido.")
+        producto = pedirIdEntero("ID del producto: ")
+    return producto
+
+def pedirProductoSinMostrar(db):
+    producto = pedirIdEntero("ID del producto: ")
+    while not validar_clave_foranea(db, "PRODUCT", "Pro_code", producto):
+        print("Ingrese un producto válido.")
+        producto = pedirIdEntero("ID del producto: ")
+    return producto
 
 def consultar_venta(db, id):
     conection = db.cursor()
@@ -81,13 +116,18 @@ def consultar_ventas_sin(db):
         fecha = fila[1].strftime('%d/%m/%Y') 
         vendedor_id = fila[2]
         cliente_id = fila[3]
-        print(f"(Num. venta: {id_venta}, fecha: {fecha}, ID Vendedor :'{vendedor_id}', ' ID Cliente: {cliente_id}')")
+        print(f"Num. venta: {id_venta} - fecha: {fecha} - ID Vendedor :{vendedor_id} - ID Cliente: {cliente_id}")
+
 
 def consultar_ventas(db):
     consultar_ventas_sin(db)
     eleccion = input("Ingrese S si desea consultar los detalles de una venta: ")
     if eleccion == "S":
-        venta = int(input("Ingrese el ID de la venta: "))
+        venta = pedirIdEntero("Ingrese el ID de la venta que desea consultar: ")
+        if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
+            printMensajeErrorFK()
+            return
+        
         dato1, dato2 = consultar_venta(db, venta)
         for i in range(len(dato1)):
             id_p = dato1[i]
@@ -96,15 +136,18 @@ def consultar_ventas(db):
 
 def modificar_venta(db):
     consultar_ventas_sin(db)
-    venta = int(input("Ingrese el ID de la venta que va a modificar: "))
-    pro_eleccion = ""
+    venta = pedirIdEntero("Ingrese el ID de la venta que desea modificar: ")
+    if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
+        printMensajeErrorFK()
+        return
+    
     productoss = []
     cantidades = []
     productos.consultar_productos_ex(db, ids)
     while pro_eleccion !="N":
         ids, data = consultar_venta(db, venta)
-        producto = input("Ingrese el ID del producto a añadir a la venta: ")
-        cantidad = input("Ingrese la cantidad: ")
+        producto = pedirProductoSinMostrar(db)
+        cantidad = pedirNatural("Cantidad: ")
         productoss.append(producto)
         cantidades.append(cantidad)
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
@@ -115,7 +158,12 @@ def modificar_venta(db):
 
 def eliminar_venta(db):
     conection = db.cursor()
-    venta_id = input("Ingrese el ID de la venta que desea eliminar ")
+    consultar_ventas_sin(db)
+    venta_id = pedirIdEntero("Ingrese el ID de la venta que desea eliminar: ")
+    if not validar_clave_foranea(db, "SALE", "Sal_ID", venta_id):
+        printMensajeErrorFK()
+        return
+    
     values = (venta_id, )     
     query2 = "DELETE FROM PRODUCT_SALE WHERE Sal_ID=%s"
     dato1 , dato2 = consultar_venta(db, venta_id)

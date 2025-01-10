@@ -97,6 +97,16 @@ def consultar_UnSoloProducto(db, id):
         unidad = fila[4]
         return f"id: {id_producto} - producto: {nombre} - precio: {precio} - idCategoria: {idCategoria} - unidad: {unidad}" 
 
+def consultar_producto(db, id):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM PRODUCT WHERE Pro_code = %s", (id, ))
+    datos = conection.fetchall()
+    for fila in datos:
+        id_producto = fila[0]
+        nombre = fila[1]
+        precio = float(fila[2]) 
+        return f"producto: {nombre} - precio: {precio}" 
+
 def actualizar_producto(db):
     consultar_productosSinInventario(db)
     conection = db.cursor()
