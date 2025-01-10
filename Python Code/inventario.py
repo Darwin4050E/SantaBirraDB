@@ -53,12 +53,12 @@ def consultar_inventario(db):
         stock = fila[3]
         print(f"id: {id_inventario} - producto: {codigoProd} - fecha: {fecha} - stock: {stock} ")
 
-def consultar_inventario1(db, id):
+def consultar_inventario1(db, id, procode):
     conection = db.cursor()
-    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s ", (id, ))
+    conection.execute("SELECT * FROM INVENTORY WHERE Inv_id = %s and Pro_Code= %s", (id,procode ))
     datos = conection.fetchall()
     for fila in datos:
-        stock = int(fila[2]) 
+        stock = int(fila[3]) 
         return stock
 
 def obtener_ultimo_inventario(db, codProd):
@@ -98,12 +98,11 @@ def actualizar_inventario(db):
     else:
         print(f"Inventario actualizado.")
 
-def actualizarstock_inventario(db, id, stock):
+def actualizarstock_inventario(db, id, pro, stock):
     conection = db.cursor()
-    fechaActual = datetime.today().date() 
 
-    query = "UPDATE INVENTORY SET Inv_Stock=%s, Inv_Date=%s WHERE Inv_ID = %s"
-    values = (stock, fechaActual, id)
+    query = "UPDATE INVENTORY SET Inv_Stock=%s WHERE Inv_ID = %s and Pro_code = %s"
+    values = (stock, id, pro)
             
     conection.execute(query, values)
     db.commit()

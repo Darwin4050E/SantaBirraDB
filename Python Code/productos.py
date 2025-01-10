@@ -27,7 +27,7 @@ def consultar_productos_ex(db, ids):
         nombre = fila[1]
         precio = float(fila[2]) 
         inv = inventario.obtener_ultimo_inventario(db, id_producto)
-        cantidad = inventario.consultar_inventario1(db, inv)
+        cantidad = inventario.consultar_inventario1(db, inv, id_producto)
         print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad}")
 
 def consultar_productos(db):
@@ -39,7 +39,7 @@ def consultar_productos(db):
         nombre = fila[1]
         precio = float(fila[2]) 
         inv = inventario.obtener_ultimo_inventario(db, id_producto)
-        cantidad = inventario.consultar_inventario1(db, inv)
+        cantidad = inventario.consultar_inventario1(db, inv, id_producto)
         print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad}")
 
 def consultar_producto(db, id):
