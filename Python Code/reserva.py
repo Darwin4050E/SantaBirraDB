@@ -151,6 +151,9 @@ def consultar_datos_reserva(db, reserva):
     conection.execute("SELECT * FROM BOOKING JOIN BOOKING_CUSTOMER USING (Boo_ID) WHERE Boo_ID = %s", (reserva,))
     datos = conection.fetchall()
     print("\nDatos de la reserva:")
+    if len(datos) == 0:
+        print("No se encontraron acompañantes.")
+        return
     for fila in datos:
         id_reserva = fila[0]
         fecha = fila[1]

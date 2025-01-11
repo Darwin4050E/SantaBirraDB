@@ -4,9 +4,10 @@ from validadorFK import *
 from inputHelper import *
 from outputHelper import *
 import mensajes as msj
+import productos as prod
 
 def insert_inventario(db):
-
+    prod.consultar_productosSinInventario(db)
     codigoProd = pedirIdEntero("Código del producto: ")
     if (not validar_clave_foranea(db, "PRODUCT", "Pro_Code", codigoProd)):
         printMensajeErrorFK()
