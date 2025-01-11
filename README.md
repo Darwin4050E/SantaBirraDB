@@ -9,5 +9,3 @@ del cliente.
 
 ![Logo SantaBirraDB](image.png)
 
-Modelo Lógico
-![Modelo Lógico](<MODELO LOGICO SANTA BIRRA DB-1.jpeg>)
