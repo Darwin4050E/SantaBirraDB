@@ -758,4 +758,160 @@ INSERT INTO PRODUCT_SALE (Sal_ID, Pro_Code, ProSale_Quantity) VALUES
 (20, 13, 4), -- Sprite 400ml
 (20, 6, 2); -- Heineken 330ml
 
+-- Triggers de Product_Supplier.
 
+DELIMITER //
+CREATE TRIGGER TRG_COMPRAS_AFTER_INSERT
+AFTER INSERT ON Product_Supplier
+FOR EACH ROW
+BEGIN
+	UPDATE Inventory
+    SET Inv_Stock = new.Bill_Quantity
+    WHERE Pro_Code = new.Pro_Code AND Inv_Date = new.Bill_Date;
+END; //
+DELIMITER ;
+
+-- View de reportar usando Product, Product_Supplier, Supplier.
+CREATE VIEW VW_COMPRAS_GASTOSPROVEEDOR AS
+SELECT Supplier.Sup_Ruc, Supplier.Sup_Name, SUM(Product_Supplier.Bill_Quantity * Product.Pro_Price) as Sup_Total
+FROM Supplier
+NATURAL JOIN Product_Supplier
+NATURAL JOIN Product
+GROUP BY Supplier.Sup_Ruc, Supplier.Sup_Name
+ORDER BY Sup_Total DESC;
+
+-- SP's de ProductSupplier:
+
+DELIMITER //
+CREATE PROCEDURE SP_COMPRAS_INSERTAR(
+IN BillCode INT, 
+IN SupRuc VARCHAR(20), 
+IN ProCode INT, 
+IN BillDate DATE, 
+IN BillQuantity INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error al insertar la compra.';
+    END;
+    START TRANSACTION;
+		INSERT INTO Product_Supplier
+		VALUES (BillCode, SupRuc, ProCode, BillDate, BillQuantity);
+    COMMIT;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE SP_COMPRAS_CONSULTAR(
+IN BillCode INT, 
+IN SupRuc VARCHAR(20), 
+IN ProCode INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error al consultar la compra.';
+    END;
+    START TRANSACTION;
+		SELECT Bill_Date, Bill_Quantity
+		FROM Product_Supplier
+		WHERE Bill_Code = BillCode AND Sup_RUC = SupRuc AND Pro_Code = ProCode;
+    COMMIT;
+END //
+DELIMITER ;
+
+-- SP para actualización de compras:
+
+DELIMITER //
+CREATE PROCEDURE SP_COMPRAS_ACTUALIZARFECHA(
+IN BillCode INT, 
+IN SupRUC VARCHAR(20), 
+IN ProCode INT, 
+IN BillDate DATE
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error al actualizar la fecha de la compra.';
+    END;
+    START TRANSACTION;
+		UPDATE Product_Supplier
+		SET Bill_Date = BillValue
+		WHERE Bill_Code = BillCode AND Sup_RUC = SupRUC AND ProCode;
+    COMMIT;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE SP_COMPRAS_ACTUALIZARCANTIDAD(
+IN BillCode INT, 
+IN SupRUC VARCHAR(20), 
+IN ProCode INT, 
+IN BillQuantity INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error al actualiar la cantidad de producto comprada.';
+    END;
+    START TRANSACTION;
+		UPDATE Product_Supplier
+		SET Bill_Quantity = BillValue
+		WHERE Bill_Code = BillCode AND SupRUC = SupRUC AND ProCode;
+    COMMIT;
+END //
+DELIMITER ;
+
+-- SP para eliminación de compras.
+
+DELIMITER //
+CREATE PROCEDURE SP_COMPRAS_ELIMINAR(
+IN Bill_Code INT, 
+IN Sup_RUC VARCHAR(20), 
+IN Pro_Code INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error al eliminar la compra.';
+    END;
+    START TRANSACTION;
+		DELETE FROM Product_Supplier
+        WHERE Bill_Code = Bill_Code AND Sup_RUC = Sup_RUC AND Pro_Code;
+    COMMIT;
+END; /
+DELIMITER ;
+
+-- Índices de Product_Supplier:
+
+CREATE INDEX IDX_COMPRAS_COMPOSITE
+ON Product_Supplier(Bill_Date, Bill_Quantity);
+
+CREATE INDEX IDX_PRODUCT_COMPOSITE
+ON Product(Pro_Price);
+
+-- Usuarios:
+
+CREATE USER 'manager_user'@'localhost' IDENTIFIED BY 'ManPas001';
+
+-- Permisos a usuarios:
+
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_INSERTAR TO 'manager_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_CONSULTAR TO 'manager_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIARFECHA TO 'manager_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIZARCANTIDAD TO 'manager_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ELIMINAR TO 'manager_user'@'localhost';
+
+GRANT EXECUTE ON SANTABIRRADB.VW_COMPRAS_GASTOSPROVEEDOR TO 'manager_user'@'localhost';
