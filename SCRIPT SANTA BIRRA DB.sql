@@ -761,15 +761,27 @@ INSERT INTO PRODUCT_SALE (Sal_ID, Pro_Code, ProSale_Quantity) VALUES
 -- Triggers de Product_Supplier.
 
 DELIMITER //
+CREATE PROCEDURE SP_INVENTORY_ACTUALIZARSTOCK(
+OUT InvId INT
+)
+BEGIN
+	SELECT Inv_ID INTO InvId
+    FROM Inventory WHERE Pro_Code = new.Pro 
+    ORDER BY Inv_ID DESC 
+    LIMIT 1;
+END
+//
+DELIMITER ;
+
+DELIMITER //
 CREATE TRIGGER TRG_COMPRAS_AFTER_INSERT
 AFTER INSERT ON Product_Supplier
 FOR EACH ROW
 BEGIN
-	DECLARE InvID INT DEFAULT 0;
-    SELECT Inv_ID INTO InvID FROM Inventory WHERE Pro_Code = new.Pro ORDER BY Inv_ID DESC LIMIT 1;
+    CALL SP_INVENTORY_ACTUALIZARSTOCK(@InvId);
 	UPDATE Inventory
     SET Inv_Stock = Inv_Stock + new.Bill_Quantity
-    WHERE Inv_ID = InvID AND Pro_Code = new.Pro_Code;
+    WHERE Inv_ID = @InvID AND Pro_Code = new.Pro_Code;
 END; //
 DELIMITER ;
 
