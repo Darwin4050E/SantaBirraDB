@@ -13,6 +13,18 @@ def reporteVentas(db):
     finally:
         cursor.close()
 
+def reporteCompras(db):
+    query = 'SELECTO * FROM VW_COMPRAS_GASTOSPROVEEDOR'
+    try:
+        cursor = db.cursor(query)
+        datos = cursor.fetchall()
+        for dato in datos:
+            print(f"Proveedor: {dato[0]} - Gasto: {dato[1]}")
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+
 def reporteInventario(db):
     query = 'SELECT Inv_ID, Pro_Code, Pro_Name, Pro_Price FROM Inventory NATURAL JOIN Product'
     try:
@@ -52,6 +64,8 @@ def menu_crud_reportes(db):
         elif(opcion == 3):
             reporteRendimientoEventos(db)
         elif(opcion == 4):
+            reporteCompras(db)
+        elif(opcion == 5):
             return
         else:
             print(msj.opcionesError)

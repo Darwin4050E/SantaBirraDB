@@ -765,9 +765,11 @@ CREATE TRIGGER TRG_COMPRAS_AFTER_INSERT
 AFTER INSERT ON Product_Supplier
 FOR EACH ROW
 BEGIN
+	DECLARE InvID INT DEFAULT 0;
+    SELECT Inv_ID INTO InvID FROM Inventory WHERE Pro_Code = new.Pro ORDER BY Inv_ID DESC LIMIT 1;
 	UPDATE Inventory
-    SET Inv_Stock = new.Bill_Quantity
-    WHERE Pro_Code = new.Pro_Code AND Inv_Date = new.Bill_Date;
+    SET Inv_Stock = Inv_Stock + new.Bill_Quantity
+    WHERE Inv_ID = InvID AND Pro_Code = new.Pro_Code;
 END; //
 DELIMITER ;
 

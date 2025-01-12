@@ -133,21 +133,10 @@ def insertarCompra(db):
     fechaCompra = getFecha()
            
     cantidadComprada = pedirNatural("\nIngrese la cantidad de producto comprada: ")
-
-    primeraQuery = '''
-        INSERT INTO Product_Supplier (Pro_Code, Sup_RUC, Bill_ID, Bill_Date, Bill_Quantity)
-        VALUES (%s, %s, %s, %s, %s)
-    '''
-    segundaQuery = '''
-        UPDATE Inventory
-        SET Inv_Stock = Inv_Stock + %s
-        WHERE Pro_Code = %s AND Inv_Date = %s
-    '''
     
     try:
         cursor = db.cursor()
-        cursor.execute(primeraQuery, (codigoProducto, rucProveedor, codigoCompra, fechaCompra, cantidadComprada))
-        cursor.execute(segundaQuery, (cantidadComprada, codigoProducto, fechaCompra))
+        cursor.callproc('SP_COMPRAS_INSERTAR', [codigoCompra, rucProveedor, codigoProducto, fechaCompra, cantidadComprada])
         db.commit()
         print("\nCompra agregada con éxito.")    
     except Exception as e:
@@ -159,15 +148,9 @@ def consultarCompra(db):
     
     codigoCompra, rucProveedor, codigoProducto = solicitarDatosCompraAvanzados(db)
     
-    query = '''
-        SELECT Bill_Date, Bill_Quantity
-        FROM Product_Supplier
-        WHERE Bill_ID = %s AND Sup_RUC = %s AND Pro_Code = %s
-    '''
-    
     try:
         cursor = db.cursor()
-        cursor.execute(query, (codigoCompra, rucProveedor, codigoProducto))
+        cursor.callproc('SP_COMPRAS_CONSULTAR', [codigoCompra, rucProveedor, codigoProducto])
         datos = cursor.fetchall()
         print(f"\nFecha de la compra: {str(datos[0][0])} - Cantidad de producto comprada: {datos[0][1]}")
     except Exception as e:
@@ -219,6 +202,7 @@ def actualizarCompra(db):
                 WHERE Pro_Code = %s AND Inv_Date = %s
             '''
             cursor.execute(queryActualizarFechaInventario, (valor, codigoProducto, str(datos[0][0])))
+            cursor.callproc('SP_COMPRAS_ACTUALIZARFECHA', [codigoCompra, rucProveedor, codigoProducto, valor])
             db.commit()
         else:
             queryActualizarStockInventario = '''
@@ -227,6 +211,7 @@ def actualizarCompra(db):
                 WHERE Pro_Code = %s AND Inv_Date = %s
             '''
             cursor.execute(queryActualizarStockInventario, (valor - int(datos[0][1]), codigoProducto, str(datos[0][0])))
+            cursor.callproc('SP_COMPRAS_ACTUALIZARCANTIDAD', [codigoCompra, rucProveedor, codigoProducto, valor])
             db.commit()
         print("\nCompra actualizada con éxito.")
     except Exception as e:
@@ -238,11 +223,6 @@ def eliminarCompra(db):
     
     codigoCompra, rucProveedor, codigoProducto = solicitarDatosCompraAvanzados(db)
         
-    primeraQuery = '''
-        SELECT Bill_Date, Bill_Quantity
-        FROM Product_Supplier
-        WHERE Bill_ID = %s AND Sup_RUC = %s AND Pro_Code = %s
-    '''
     terceraQuery = '''
         DELETE FROM Product_Supplier
         WHERE Bill_ID = %s AND Sup_RUC = %s AND Pro_Code = %s
@@ -250,7 +230,7 @@ def eliminarCompra(db):
     
     try:
         cursor = db.cursor()
-        cursor.execute(primeraQuery, (codigoCompra, rucProveedor, codigoProducto))
+        cursor.callproc('SP_COMPRAS_ELIMINAR', [codigoCompra, rucProveedor, codigoProducto])
         datos = cursor.fetchall()
         segundaQuery = '''
             UPDATE Inventory
