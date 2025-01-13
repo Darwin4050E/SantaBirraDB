@@ -13,13 +13,15 @@ def reporteVentas(db):
     finally:
         cursor.close()
 
-def reporteCompras(db):
-    query = 'SELECTO * FROM VW_COMPRAS_GASTOSPROVEEDOR'
+def reporteGastosProveedor(db):
+    query = 'SELECT Sup_RUC, Sup_Name, Sup_Total FROM VW_COMPRAS_GASTOSPROVEEDOR'
     try:
-        cursor = db.cursor(query)
+        cursor = db.cursor()
+        cursor.execute(query)
         datos = cursor.fetchall()
+        print("")
         for dato in datos:
-            print(f"Proveedor: {dato[0]} - Gasto: {dato[1]}")
+            print(f"RUC: {dato[0]} - Proveedor: {dato[1]} - Gasto: {dato[2]}")
     except Exception as e:
         print(e)
     finally:
@@ -33,7 +35,7 @@ def reporteInventario(db):
         datos = cursor.fetchall()
         print(msj.reporteInventarios)
         for dato in datos:
-            print(f"Inventario: {dato[0]} - Código de producto: {dato[1]} - Producto: {dato[2]} - Cantidad: {3}")
+            print(f"Inventario: {dato[0]} - Código de producto: {dato[1]} - Producto: {dato[2]} - Cantidad: {dato[3]}")
     except Exception as e:
         print(e)
     finally:
@@ -56,7 +58,7 @@ def reporteRendimientoEventos(db):
 def menu_crud_reportes(db):
     while(True):
         print(msj.opcionesReporte)
-        opcion = int(input("Selecciona una opción [1-4]: "))
+        opcion = int(input("Selecciona una opción [1-5]: "))
         if(opcion == 1):
             reporteVentas(db)
         elif(opcion == 2):
@@ -64,7 +66,7 @@ def menu_crud_reportes(db):
         elif(opcion == 3):
             reporteRendimientoEventos(db)
         elif(opcion == 4):
-            reporteCompras(db)
+            reporteGastosProveedor(db)
         elif(opcion == 5):
             return
         else:

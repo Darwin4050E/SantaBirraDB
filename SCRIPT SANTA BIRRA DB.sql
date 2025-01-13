@@ -761,16 +761,17 @@ INSERT INTO PRODUCT_SALE (Sal_ID, Pro_Code, ProSale_Quantity) VALUES
 -- Triggers de Product_Supplier.
 
 DELIMITER //
-CREATE PROCEDURE SP_INVENTORY_ACTUALIZARSTOCK(
+CREATE PROCEDURE SP_INVENTORY_RECUPERARID(
+IN ProCode INT,
 OUT InvId INT
 )
 BEGIN
 	SELECT Inv_ID INTO InvId
-    FROM Inventory WHERE Pro_Code = new.Pro 
+    FROM Inventory
+    WHERE Pro_Code = ProCode
     ORDER BY Inv_ID DESC 
     LIMIT 1;
-END
-//
+END; //
 DELIMITER ;
 
 DELIMITER //
@@ -778,10 +779,40 @@ CREATE TRIGGER TRG_COMPRAS_AFTER_INSERT
 AFTER INSERT ON Product_Supplier
 FOR EACH ROW
 BEGIN
-    CALL SP_INVENTORY_ACTUALIZARSTOCK(@InvId);
+    CALL SP_INVENTORY_RECUPERARID(NEW.Pro_Code, @InvId);
 	UPDATE Inventory
-    SET Inv_Stock = Inv_Stock + new.Bill_Quantity
-    WHERE Inv_ID = @InvID AND Pro_Code = new.Pro_Code;
+    SET Inv_Stock = Inv_Stock + NEW.Bill_Quantity
+    WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER TRG_COMPRAS_AFTER_UPDATE
+AFTER UPDATE ON Product_Supplier
+FOR EACH ROW
+BEGIN
+	CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
+	IF NEW.Bill_Quantity IS NOT NULL THEN
+		UPDATE Inventory
+		SET Inv_Stock = Inv_Stock + (NEW.Bill_Quantity - Inv_Stock)
+		WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+    ELSE
+		UPDATE Inventory
+		SET Inv_Date = NEW.Bill_Date
+		WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+	END IF;
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER TRG_COMPRAS_AFTER_DELETE
+AFTER DELETE ON Product_Supplier
+FOR EACH ROW
+BEGIN
+    CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
+	UPDATE Inventory
+    SET Inv_Stock = Inv_Stock - OLD.Bill_Quantity
+    WHERE Inv_ID = @InvID AND Pro_Code = OLD.Pro_Code;
 END; //
 DELIMITER ;
 
@@ -798,31 +829,30 @@ ORDER BY Sup_Total DESC;
 
 DELIMITER //
 CREATE PROCEDURE SP_COMPRAS_INSERTAR(
-IN BillCode INT, 
-IN SupRuc VARCHAR(20), 
+IN BillId INT, 
+IN SupRuc CHAR(13), 
 IN ProCode INT, 
 IN BillDate DATE, 
 IN BillQuantity INT
 )
 BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
+	BEGIN
 		ROLLBACK;
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error al insertar la compra.';
-    END;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: La compra no pudo ser insertada.';
+	END;
     START TRANSACTION;
-		INSERT INTO Product_Supplier
-		VALUES (BillCode, SupRuc, ProCode, BillDate, BillQuantity);
+		INSERT INTO Product_Supplier (Bill_ID, Sup_RUC, Pro_Code, Bill_Date, Bill_Quantity)
+		VALUES (BillId, SupRuc, ProCode, BillDate, BillQuantity);
     COMMIT;
-END //
+END; //
 DELIMITER ;
-
 
 DELIMITER //
 CREATE PROCEDURE SP_COMPRAS_CONSULTAR(
-IN BillCode INT, 
-IN SupRuc VARCHAR(20), 
+IN BillId INT, 
+IN SupRuc CHAR(13), 
 IN ProCode INT
 )
 BEGIN
@@ -830,22 +860,22 @@ BEGIN
     BEGIN
 		ROLLBACK;
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error al consultar la compra.';
+        SET MESSAGE_TEXT = 'Error: La compra no pudo ser consultada.';
     END;
     START TRANSACTION;
 		SELECT Bill_Date, Bill_Quantity
 		FROM Product_Supplier
-		WHERE Bill_Code = BillCode AND Sup_RUC = SupRuc AND Pro_Code = ProCode;
+		WHERE Bill_ID = BillId AND Sup_RUC = SupRuc AND Pro_Code = ProCode;
     COMMIT;
-END //
+END; //
 DELIMITER ;
 
 -- SP para actualización de compras:
 
 DELIMITER //
 CREATE PROCEDURE SP_COMPRAS_ACTUALIZARFECHA(
-IN BillCode INT, 
-IN SupRUC VARCHAR(20), 
+IN BillId INT, 
+IN SupRuc CHAR(13), 
 IN ProCode INT, 
 IN BillDate DATE
 )
@@ -854,20 +884,20 @@ BEGIN
     BEGIN
 		ROLLBACK;
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error al actualizar la fecha de la compra.';
+        SET MESSAGE_TEXT = 'Error: La fecha de la compra no pudo ser actualizada.';
     END;
     START TRANSACTION;
 		UPDATE Product_Supplier
-		SET Bill_Date = BillValue
-		WHERE Bill_Code = BillCode AND Sup_RUC = SupRUC AND ProCode;
+		SET Bill_Date = BillDate
+		WHERE Bill_ID = BillId AND Sup_RUC = SupRuc AND Pro_Code = ProCode;
     COMMIT;
-END //
+END; //
 DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE SP_COMPRAS_ACTUALIZARCANTIDAD(
-IN BillCode INT, 
-IN SupRUC VARCHAR(20), 
+IN BillId INT, 
+IN SupRuc CHAR(13), 
 IN ProCode INT, 
 IN BillQuantity INT
 )
@@ -876,36 +906,36 @@ BEGIN
     BEGIN
 		ROLLBACK;
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error al actualiar la cantidad de producto comprada.';
+        SET MESSAGE_TEXT = 'Error: La cantidad de producto comprada no pudo ser actualizada.';
     END;
     START TRANSACTION;
 		UPDATE Product_Supplier
-		SET Bill_Quantity = BillValue
-		WHERE Bill_Code = BillCode AND SupRUC = SupRUC AND ProCode;
+		SET Bill_Quantity = BillQuantity
+		WHERE Bill_ID = BillId AND Sup_Ruc = SupRuc AND Pro_Code = ProCode;
     COMMIT;
-END //
+END; //
 DELIMITER ;
 
 -- SP para eliminación de compras.
 
 DELIMITER //
 CREATE PROCEDURE SP_COMPRAS_ELIMINAR(
-IN Bill_Code INT, 
-IN Sup_RUC VARCHAR(20), 
-IN Pro_Code INT
+IN BillId INT, 
+IN SupRuc CHAR(13), 
+IN ProCode INT
 )
 BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error al eliminar la compra.';
+        SET MESSAGE_TEXT = 'Error: La compra no pudo ser eliminada.';
     END;
     START TRANSACTION;
 		DELETE FROM Product_Supplier
-        WHERE Bill_Code = Bill_Code AND Sup_RUC = Sup_RUC AND Pro_Code;
+        WHERE Bill_ID = BillId AND Sup_RUC = SupRuc AND Pro_Code = ProCode;
     COMMIT;
-END; /
+END; //
 DELIMITER ;
 
 -- Índices de Product_Supplier:
@@ -918,14 +948,14 @@ ON Product(Pro_Price);
 
 -- Usuarios:
 
-CREATE USER 'manager_user'@'localhost' IDENTIFIED BY 'ManPas001';
+CREATE USER 'manager_user'@'%' IDENTIFIED BY 'ManPas001';
 
 -- Permisos a usuarios:
 
-GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_INSERTAR TO 'manager_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_CONSULTAR TO 'manager_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIARFECHA TO 'manager_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIZARCANTIDAD TO 'manager_user'@'localhost';
-GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ELIMINAR TO 'manager_user'@'localhost';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_INSERTAR TO 'manager_user'@'%';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_CONSULTAR TO 'manager_user'@'%';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIARFECHA TO 'manager_user'@'%';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ACTUALIZARCANTIDAD TO 'manager_user'@'%';
+GRANT EXECUTE ON PROCEDURE SANTABIRRADB.SP_COMPRAS_ELIMINAR TO 'manager_user'@'%';
 
-GRANT EXECUTE ON SANTABIRRADB.VW_COMPRAS_GASTOSPROVEEDOR TO 'manager_user'@'localhost';
+GRANT EXECUTE ON SANTABIRRADB.VW_COMPRAS_GASTOSPROVEEDOR TO 'manager_user'@'%';
