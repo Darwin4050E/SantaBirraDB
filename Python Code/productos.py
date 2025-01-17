@@ -4,6 +4,10 @@ from inputHelper import *
 from outputHelper import *
 from fechaHelper import *
 from validadorFK import *
+import mysql.connector as mysql
+from prettytable import PrettyTable
+
+
 
 def insert_producto(db):
     mostrarCategorias(db)
@@ -17,20 +21,26 @@ def insert_producto(db):
     unidadMedida = pedirUnidadMedidad("Unidad de medida del producto: ")
 
     conection = db.cursor()
-    tupla = (nombre, precio, cat_id, unidadMedida)
-    sql = "INSERT INTO PRODUCT (Pro_Name, Pro_Price, Cat_ID, Pro_UnitSize) VALUES (%s, %s, %s, %s) "
-    conection.execute(sql,tupla)
-    db.commit()
-    printIngresoExitoso()
+    try: 
+        tupla = (nombre, precio, cat_id, unidadMedida)
+        sql = "INSERT INTO PRODUCT (Pro_Name, Pro_Price, Cat_ID, Pro_UnitSize) VALUES (%s, %s, %s, %s) "
+        conection.execute(sql,tupla)
+        db.commit()
+        printIngresoExitoso()
+    except mysql.Error as e:
+        print(e.msg)
 
 def mostrarCategorias(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM CATEGORYPROD")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Categoría"]
     datos = conection.fetchall()
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        print(f"id: {id_producto} - categoria: {nombre}") 
+        tabla.add_row([id_producto, nombre])
+    print(tabla)
 
 def pedirCategoria(db):
     mostrarCategorias(db)
@@ -63,6 +73,8 @@ def consultar_productos_ex(db, ids):
 def consultar_productosConInventario(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PRODUCT")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Producto", "Precio", "Unidad", "ID Categoría", "Cantidad"]
     datos = conection.fetchall()
     for fila in datos:
         id_producto = fila[0]
@@ -72,11 +84,14 @@ def consultar_productosConInventario(db):
         cantidad = inventario.consultar_inventario1(db, inv, id_producto)
         idCategoria = fila[3]
         unidad = fila[4]
-        print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad} - idCategoria: {idCategoria} - unidad: {unidad}")
+        tabla.add_row([id_producto, nombre, precio, unidad, idCategoria, cantidad])
+    print(tabla)
 
 def consultar_productosSinInventario(db):
     conection = db.cursor()
-    conection.execute("SELECT * FROM PRODUCT NATURAL JOIN CATEGORYPROD")
+    conection.execute("SELECT * FROM PRODUCT NATURAL JOIN CATEGORYPROD ORDER BY Pro_code")
+    tabla = PrettyTable()  
+    tabla.field_names = ["ID", "Producto", "Precio", "Unidad", "ID Categoría", "Categoría"]
     datos = conection.fetchall()
     for fila in datos:
         id_categoria = fila[0]
@@ -85,7 +100,8 @@ def consultar_productosSinInventario(db):
         precio = fila[3] 
         unidad = fila[4]
         categoriaNombre = fila[5]
-        print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - unidad: {unidad} - idCategoria: {id_categoria} - categoria: {categoriaNombre}") 
+        tabla.add_row([id_producto, nombre, precio, unidad, id_categoria, categoriaNombre])
+    print(tabla)
 
 def consultar_UnSoloProducto(db, id):
     conection = db.cursor()

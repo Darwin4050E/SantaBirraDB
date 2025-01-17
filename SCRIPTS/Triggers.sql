@@ -59,3 +59,15 @@ BEGIN
     WHERE Inv_ID = @InvID AND Pro_Code = OLD.Pro_Code;
 END; //
 DELIMITER ;
+
+-- Triggers Inventario 
+-- Cada vez que se agrega un producto, se le agrega un inventario
+DELIMITER //
+CREATE TRIGGER TRG_AFTER_INSERT_PRODUCTO
+AFTER INSERT ON PRODUCT
+FOR EACH ROW
+BEGIN 
+	INSERT INTO INVENTORY (Inv_ID, Pro_Code, Inv_Date, Inv_Stock) 
+    VALUES (1, new.Pro_Code, curdate(), 0);
+END //
+DELIMITER ;
