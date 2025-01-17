@@ -2,6 +2,7 @@ import mensajes as msj
 from validadorFK import *
 from inputHelper import *
 from outputHelper import *
+from prettytable import PrettyTable
 
 def insertar_cliente(db):
     cedula = pedirCedula("Cédula: ")
@@ -26,6 +27,8 @@ def consultar_clientes(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM CUSTOMER")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["Cédula", "Nombre", "Apellido", "Celular", "Correo", "Sexo"]
     for fila in datos:
         cedula = fila[0]
         nombre = fila[1]
@@ -33,9 +36,24 @@ def consultar_clientes(db):
         celular = fila[3]
         correo = fila[4]
         sexo = fila[5]
-        print(f"id: {cedula} - nombre: {nombre} - apellido: {apellido} - correo: {correo} - celular: {celular} - sexo: {sexo}")
+        tabla.add_row([cedula, nombre, apellido, celular, correo, sexo])
+    print(tabla)
+
+def consultar_clientesBasico(db):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM CUSTOMER")
+    datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["Cédula", "Nombre", "Apellido"]
+    for fila in datos:
+        cedula = fila[0]
+        nombre = fila[1]
+        apellido = fila[2]
+        tabla.add_row([cedula, nombre, apellido])
+    print(tabla)
 
 def actualizar_cliente(db):
+    consultar_clientes(db)
     conection = db.cursor()
     cedula = pedirCedula("Cédula: ")
     if not validar_clave_foranea(db, "CUSTOMER", "Cus_ID", cedula):
@@ -53,6 +71,7 @@ def actualizar_cliente(db):
     printActualizacionExitosa()
 
 def eliminar_cliente(db):
+    consultar_clientesBasico(db)
     conection = db.cursor()
     cedula = pedirCedula("Cédula: ")
 
@@ -75,10 +94,8 @@ def menu_crud_clientes(db):
         elif opcion == "2":
             consultar_clientes(db)
         elif opcion == "3":
-            consultar_clientes(db)
             actualizar_cliente(db)   
         elif opcion == "4":
-            consultar_clientes(db)
             eliminar_cliente(db)
         elif opcion == "5":
             break

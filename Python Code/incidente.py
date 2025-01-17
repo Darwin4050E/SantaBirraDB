@@ -6,6 +6,7 @@ from fechaHelper import *
 from outputHelper import *
 from miembros import *
 from clientes import *
+from prettytable import PrettyTable
 
 def insert_incidente(db):
     conection = db.cursor()
@@ -22,6 +23,7 @@ def insert_incidente(db):
     conection.execute(sql,tupla)
     db.commit()
     printIngresoExitoso()
+    conection.close()
 
 def pedirGuardia(db, mensaje):
     print("\nGuardias disponibles: ")
@@ -78,6 +80,8 @@ def consultar_incidentes(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM INCIDENT NATURAL JOIN INCIDENT_CUSTOMER ORDER BY INC_DATE DESC")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Incidente", "Descripción", "Guardia", "ID I-C", "Cliente", "Fecha"]
     for fila in datos:
         id = fila[0]
         descripcion = fila[1]
@@ -85,18 +89,23 @@ def consultar_incidentes(db):
         ic_id = fila[3]
         cliente = fila[4]
         fecha = fila[5].strftime("%d/%m/%Y")
-        print(f"id Incidente: {id} - descripcion: {descripcion} - guardia: {guardia} - IncCliente_ID: {ic_id} - cliente: {cliente} - fecha: {fecha}")
+        tabla.add_row([id, descripcion, guardia, ic_id, cliente, fecha])
+    print(tabla)
         
 def consultar_tipos_incidente(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM INCIDENT")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Descripción", "Guardia"]
+
     for fila in datos:
         id = fila[0]
         descripcion = fila[1]
         guardia = fila[2]
-        print(f"id: {id} - descripción: {descripcion} - guardia: {guardia}")
-
+        tabla.add_row([id, descripcion, guardia])
+    print(tabla)
+    
 def actualizar_incidente(db):
     conection = db.cursor()
     codIncidente = pedirIdEntero("ID del incidente: ")

@@ -1,9 +1,9 @@
 import mensajes as msj
-import inventario
 from inputHelper import *
 from outputHelper import *
 from fechaHelper import *
 from validadorFK import *
+from prettytable import PrettyTable
 
 def insertar_Evento(db):
     mostrarCategorias(db)
@@ -27,10 +27,13 @@ def mostrarCategorias(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM CATEGORYEVE")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Nombre"]
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        print(f"id: {id_producto} - categoria: {nombre}") 
+        tabla.add_row([id_producto, nombre])
+    print(tabla)
 
 def pedirCategoria(db):
     mostrarCategorias(db)
@@ -44,6 +47,8 @@ def consultar_eventos(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM EVENT NATURAL JOIN CATEGORYEVE")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Nombre", "P. Hombres", "P. Mujeres", "ID Cat", "Categoria"]
     for fila in datos:
         id_categoria = fila[0]
         id_evento = fila[1]
@@ -51,7 +56,8 @@ def consultar_eventos(db):
         precioH = fila[3]
         precioM = fila[4]
         categoria = fila[5]
-        print(f"id: {id_evento} - nombre: {nombre} - precioH: {precioH} - precioM: {precioM} - id_cat: {id_categoria} -categoria: {categoria}") 
+        tabla.add_row([id_evento, nombre, precioH, precioM, id_categoria, categoria])
+    print(tabla)
 
 def actualizar_eventos(db):
     consultar_eventos(db)

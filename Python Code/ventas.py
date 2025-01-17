@@ -9,6 +9,7 @@ from validadorFK import *
 from fechaHelper import *
 from miembros import *
 
+
 def restar(db, numero, productoo, cantidadess):
         conection = db.cursor()
         tupla1 = (numero, productoo, cantidadess)
