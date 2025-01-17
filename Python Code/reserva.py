@@ -9,11 +9,8 @@ from eventos import *
 from clientes import *
 from outputHelper import *
 from validadorFK import *
-<<<<<<< HEAD
 import mysql.connector as mysql
-=======
 from prettytable import PrettyTable
->>>>>>> 6998bd0faac4d2d1bdf59a7b760a23260b37e8c3
 
 def insertar_reserva(db):
     conection = db.cursor()
