@@ -2,6 +2,7 @@ import mensajes as msj
 from inputHelper import *
 from outputHelper import *
 from validadorFK import *
+from prettytable import PrettyTable
 
 def crear_miembro(db):
     cedula = pedirCedula("Cédula del empleado: ")
@@ -92,17 +93,22 @@ def obtenerRol(db, cedula):
 def consultar_empleados(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM MEMBER")
+    tabla = PrettyTable()
+    tabla.field_names = ["Cédula", "Nombre", "Apellido", "Experiencia"]
     datos = conection.fetchall()
     for fila in datos:
         cedula = fila[0]
         nombre = fila[1]
         apellido = fila[2]
         experiencia = fila[3]
-        print(f"Cédula: {cedula}, Nombre: {nombre}, Apellido: {apellido}, Experiencia: {experiencia}")
+        tabla.add_row([cedula, nombre, apellido, experiencia])
+    print(tabla)
 
 #Consulta empleados de un rol específico
 def consultar_empleadosPorRol(db, rol):
     conection = db.cursor()
+    tabla = PrettyTable()
+    tabla.field_names = ["Cédula", "Nombre", "Apellido", "Experiencia", "Rol"]
     conection.execute("SELECT * FROM MEMBER WHERE Mem_ID IN (SELECT Mem_ID FROM {})".format(rol))
     datos = conection.fetchall()
     for fila in datos:
@@ -110,8 +116,9 @@ def consultar_empleadosPorRol(db, rol):
         nombre = fila[1]
         apellido = fila[2]
         experiencia = fila[3]
-        print(f"Cédula: {cedula}, Nombre: {nombre}, Apellido: {apellido}, Experiencia: {experiencia}, Rol: {rol}")
-
+        tabla.add_row([cedula, nombre, apellido, experiencia, rol])
+    print(tabla)
+    
 def consultarPorRol(db):
 
     rol = pedirRol()

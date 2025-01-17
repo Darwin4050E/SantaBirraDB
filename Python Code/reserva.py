@@ -9,7 +9,11 @@ from eventos import *
 from clientes import *
 from outputHelper import *
 from validadorFK import *
+<<<<<<< HEAD
 import mysql.connector as mysql
+=======
+from prettytable import PrettyTable
+>>>>>>> 6998bd0faac4d2d1bdf59a7b760a23260b37e8c3
 
 def insertar_reserva(db):
     conection = db.cursor()
@@ -158,6 +162,9 @@ def consultar_datos_reserva(db, reserva):
     if len(datos) == 0:
         print("No se encontraron acompañantes.")
         return
+    
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Reserva", "Fecha", "Hora", "ID Cliente", "ID Promotor", "ID Promoción", "ID Evento", "ID Estado", "Acompañante"]
     for fila in datos:
         id_reserva = fila[0]
         fecha = fila[1]
@@ -168,8 +175,9 @@ def consultar_datos_reserva(db, reserva):
         evento_id = fila[6]
         estado_id = fila[7]
         acompañante = fila[8]
-        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id} - Acompañante: {acompañante}")
-
+        tabla.add_row([id_reserva, fecha, hora, cliente_id, promotor_id, promocion_id, evento_id, estado_id, acompañante])
+    print(tabla)
+    
 def consultar_reserva(db, reserva):
     conection = db.cursor()
     if not validar_clave_foranea(db, "BOOKING", "Boo_ID", reserva):
@@ -177,6 +185,9 @@ def consultar_reserva(db, reserva):
         return
     
     conection.execute("SELECT * FROM BOOKING WHERE Boo_ID = %s", (reserva,))
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Reserva", "Fecha", "Hora", "ID Cliente", "ID Promotor", "ID Promoción", "ID Evento", "ID Estado"]
+
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
@@ -187,11 +198,14 @@ def consultar_reserva(db, reserva):
         promocion_id = fila[5]
         evento_id = fila[6]
         estado_id = fila[7]
-        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id}")
+        tabla.add_row([id_reserva, fecha, hora, cliente_id, promotor_id, promocion_id, evento_id, estado_id])
+    print(tabla)
 
 def consultar_reservas(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM BOOKING")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Reserva", "Fecha", "Hora", "ID Cliente", "ID Promotor", "ID Promoción", "ID Evento", "ID Estado"]
     datos = conection.fetchall()
     for fila in datos:
         id_reserva = fila[0]
@@ -202,7 +216,8 @@ def consultar_reservas(db):
         promocion_id = fila[5]
         evento_id = fila[6]
         estado_id = fila[7]
-        print(f"Num. Reserva: {id_reserva} - Fecha: {fecha} - Hora: {hora} - ID Cliente: {cliente_id} - ID Promotor: {promotor_id} - ID Promocion: {promocion_id} - ID Evento: {evento_id} - ID Estado: {estado_id}")
+        tabla.add_row([id_reserva, fecha, hora, cliente_id, promotor_id, promocion_id, evento_id, estado_id])
+    print(tabla)
 
 def pedirIdReserva(db):
     consultar_reservas(db)

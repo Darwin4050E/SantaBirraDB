@@ -53,7 +53,8 @@ CREATE TABLE CATEGORYPROD (
 CREATE TABLE PRODUCT (
     Pro_Code INT AUTO_INCREMENT,
     Pro_Name VARCHAR(255) NOT NULL,
-    Pro_Price DECIMAL(7,2) NOT NULL,
+    Pro_PurchasePrice DECIMAL(7,2) NOT NULL CHECK (Pro_PurchasePrice > 0),  -- Precio de compra
+    Pro_SalePrice DECIMAL(7,2) NOT NULL CHECK (Pro_SalePrice > 0),      -- Precio de venta
     Cat_ID INT NOT NULL,
     Pro_UnitSize VARCHAR(50) NOT NULL,
     CONSTRAINT PK_Product PRIMARY KEY (Pro_Code),

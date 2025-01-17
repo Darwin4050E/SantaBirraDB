@@ -8,6 +8,7 @@ from outputHelper import *
 from validadorFK import *
 from fechaHelper import *
 from miembros import *
+from prettytable import PrettyTable
 
 
 def restar(db, numero, productoo, cantidadess):
@@ -111,14 +112,16 @@ def consultar_venta(db, id):
 def consultar_ventas_sin(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM SALE")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Venta", "Fecha", "ID Vendedor", "ID Cliente"]
     datos = conection.fetchall()
     for fila in datos:
         id_venta = fila[0]
         fecha = fila[1].strftime('%d/%m/%Y') 
         vendedor_id = fila[2]
         cliente_id = fila[3]
-        print(f"Num. venta: {id_venta} - fecha: {fecha} - ID Vendedor :{vendedor_id} - ID Cliente: {cliente_id}")
-
+        tabla.add_row([id_venta, fecha, vendedor_id, cliente_id])
+    print(tabla)
 
 def consultar_ventas(db):
     consultar_ventas_sin(db)
