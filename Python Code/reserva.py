@@ -8,6 +8,8 @@ from promociones import *
 from eventos import *
 from clientes import *
 from outputHelper import *
+from validadorFK import *
+import mysql.connector as mysql
 
 def insertar_reserva(db):
     conection = db.cursor()
@@ -20,25 +22,26 @@ def insertar_reserva(db):
     estado = pedirEstado(db)
     zona = pedirZona(db)
 
-    tupla = (fecha, hora, cliente, promotor, promocion, evento, estado)
-
-    query = "INSERT INTO BOOKING(Boo_Date, Boo_Hour, Cus_ID, Mem_ID, Prom_ID, Eve_ID, Sta_ID) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    conection.execute(query,tupla)
-    db.commit()    
+    try:
+        conection.callproc('SP_insertarReserva', (fecha, hora, cliente, promotor, promocion, evento, estado))
+    except mysql.Error as e:
+        print(e)
+    
 
     conection.execute("SELECT LAST_INSERT_ID()")
     ultimo_id = conection.fetchone()[0]
 
-    query = "INSERT INTO BOOKING_ZONE(Boo_ID, Zon_ID) VALUES (%s, %s)"
-    conection.execute(query,(ultimo_id, zona))
-    db.commit()
+    try:
+        conection.callproc('SP_insertarReservaZona', (ultimo_id, zona))
+    except mysql.Error as e:
+        print(e)
 
     print()
     nro_participantes = pedirEnteroPositivo("Ingrese la cantidad de acompañantes: ")
     if nro_participantes > 0:
-        ids_acompanates = lista_acompanantes(nro_participantes)
-        registrar_acompanantes(ultimo_id, ids_acompanates, db)
-    print("Reserva registrada con éxito.")
+        ids_acompanantes = lista_acompanantes(db, nro_participantes)
+        registrar_acompanantes(ultimo_id, ids_acompanantes, db)
+    printIngresoExitoso()
     
 
 def pedirPromotor(db):
@@ -137,9 +140,10 @@ def registrar_acompanantes(id_reserva, ids_acompanantes, db):
     conection = db.cursor()
     validar_y_registrar_clientes(ids_acompanantes, db)
     for id_acompanante in ids_acompanantes:
-        query = "INSERT INTO BOOKING_CUSTOMER(Boo_ID, Cus_ID) VALUES (%s, %s)"
-        conection.execute(query, (id_reserva, id_acompanante))
-        db.commit()
+        try:
+            conection.callproc('SP_registrarAcompañantes', (id_reserva, id_acompanante))
+        except mysql.Error as e:
+            print(e)
     print("Acompañantes registrados con éxito.")
 
 def consultar_datos_reserva(db, reserva):
@@ -234,50 +238,50 @@ def actualizar_reserva(db, reserva_id):
 
 def actualizar_fecha(conection,reserva_id,db):
     fecha = getFecha()
-    query = "UPDATE BOOKING SET Boo_Date=%s WHERE Boo_ID=%s"
-    values = (fecha, reserva_id)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_actualizarFecha', (fecha, reserva_id))
+    except mysql.Error as e:
+        print(e)
     printActualizacionExitosa()
 
 def actualizar_hora(conection,reserva_id,db):
     hora = getHora()
-    query = "UPDATE BOOKING SET Boo_Hour=%s WHERE Boo_ID=%s"
-    values = (hora, reserva_id)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_actualizarHora', (hora, reserva_id))
+    except mysql.Error as e:
+        print(e)
     printActualizacionExitosa()
 
 def actualizar_zona(conection, reserva_id,db):
     zona = pedirZona(db)
-    query = "UPDATE BOOKING_ZONE SET Zon_ID=%s WHERE Boo_ID=%s"
-    values = (zona, reserva_id)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_actualizarZona', (zona, reserva_id))
+    except mysql.Error as e:
+        print(e)
     printActualizacionExitosa()
 
 def actualizar_estado(conection, reserva_id,db):
     estado = pedirEstado(db)
-    query = "UPDATE BOOKING SET Sta_ID=%s WHERE Boo_ID=%s"
-    values = (estado, reserva_id)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_actualizarStatus', (estado, reserva_id))
+    except mysql.Error as e:
+        print(e)
     printActualizacionExitosa()
 
 def actualizar_promocion(conection, reserva_id, db):
     promocion = pedirPromocion(db)
-    query = "UPDATE BOOKING SET Prom_ID=%s WHERE Boo_ID=%s"
-    values = (promocion, reserva_id)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_actualizarPromocion', (promocion, reserva_id))
+    except mysql.Error as e:
+        print(e)
     printActualizacionExitosa()
 
 def eliminar_reserva(db, reserva):
     conection = db.cursor()
-    query = "DELETE FROM BOOKING WHERE Boo_ID=%s"
-    values = (reserva,)
-    conection.execute(query, values)
-    db.commit()
+    try:
+        conection.callproc('SP_eliminarReserva', (reserva,))
+    except mysql.Error as e:
+        print(e)
     
     if conection.rowcount == 0:
         printMensajeErrorFK()
