@@ -6,6 +6,7 @@ from fechaHelper import *
 from validadorFK import *
 import mysql.connector as mysql
 from prettytable import PrettyTable
+from inputHelper import *
 
 
 
@@ -17,17 +18,19 @@ def insert_producto(db):
         return
     
     nombre = pedirNombreConSignos("Nombre del producto: ")
-    precio = pedirDecimalPositivo("Precio del producto: ")
+    precioCompra = pedirDecimalPositivo("Precio de compra del producto: ")
+    precioVenta = pedirDecimalPositivo("Precio de venta del producto: ")
     unidadMedida = pedirUnidadMedidad("Unidad de medida del producto: ")
 
     conection = db.cursor()
     try: 
-        tupla = (nombre, precio, cat_id, unidadMedida)
-        sql = "INSERT INTO PRODUCT (Pro_Name, Pro_Price, Cat_ID, Pro_UnitSize) VALUES (%s, %s, %s, %s) "
+        tupla = (nombre, precioCompra, precioVenta, cat_id, unidadMedida)
+        sql = "INSERT INTO PRODUCT (Pro_Name, Pro_PurchasePrice, Pro_SalePrice, Cat_ID, Pro_UnitSize) VALUES (%s, %s, %s, %s, %s)"
         conection.execute(sql,tupla)
         db.commit()
         printIngresoExitoso()
     except mysql.Error as e:
+        db.rollback()
         print(e.msg)
 
 def mostrarCategorias(db):
@@ -65,7 +68,7 @@ def consultar_productos_ex(db, ids):
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        precio = float(fila[2]) 
+        precio = float(fila[3]) 
         inv = inventario.obtener_ultimo_inventario(db, id_producto)
         cantidad = inventario.consultar_inventario1(db, inv, id_producto)
         print(f"id: {id_producto} - producto: {nombre} - precio: {precio} - cantidad: {cantidad}")
@@ -74,33 +77,35 @@ def consultar_productosConInventario(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PRODUCT")
     tabla = PrettyTable()
-    tabla.field_names = ["ID", "Producto", "Precio", "Unidad", "ID Categoría", "Cantidad"]
+    tabla.field_names = ["ID", "Producto", "Precio Compra", "Precio Venta", "Unidad", "ID Categoría", "Cantidad"]
     datos = conection.fetchall()
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        precio = float(fila[2]) 
+        precioC = fila[2]
+        precioV = fila[3]
         inv = inventario.obtener_ultimo_inventario(db, id_producto)
         cantidad = inventario.consultar_inventario1(db, inv, id_producto)
-        idCategoria = fila[3]
-        unidad = fila[4]
-        tabla.add_row([id_producto, nombre, precio, unidad, idCategoria, cantidad])
+        idCategoria = fila[4]
+        unidad = fila[5]
+        tabla.add_row([id_producto, nombre, precioC, precioV, unidad, idCategoria, cantidad])
     print(tabla)
 
 def consultar_productosSinInventario(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PRODUCT NATURAL JOIN CATEGORYPROD ORDER BY Pro_code")
     tabla = PrettyTable()  
-    tabla.field_names = ["ID", "Producto", "Precio", "Unidad", "ID Categoría", "Categoría"]
+    tabla.field_names = ["ID", "Producto", "Precio Compra", "Precio Venta", "Unidad", "ID Categoría", "Categoría"]
     datos = conection.fetchall()
     for fila in datos:
         id_categoria = fila[0]
         id_producto = fila[1]
         nombre = fila[2]
-        precio = fila[3] 
-        unidad = fila[4]
-        categoriaNombre = fila[5]
-        tabla.add_row([id_producto, nombre, precio, unidad, id_categoria, categoriaNombre])
+        precioC = fila[3] 
+        precioV = fila[4]
+        unidad = fila[5]
+        categoriaNombre = fila[6]
+        tabla.add_row([id_producto, nombre, precioC, precioV, unidad, id_categoria, categoriaNombre])
     print(tabla)
 
 def consultar_UnSoloProducto(db, id):
@@ -110,9 +115,9 @@ def consultar_UnSoloProducto(db, id):
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        precio = float(fila[2]) 
-        idCategoria = fila[3]
-        unidad = fila[4]
+        precio = float(fila[3]) 
+        idCategoria = fila[4]
+        unidad = fila[5]
         return f"id: {id_producto} - producto: {nombre} - precio: {precio} - idCategoria: {idCategoria} - unidad: {unidad}" 
 
 def consultar_producto(db, id):
@@ -122,7 +127,7 @@ def consultar_producto(db, id):
     for fila in datos:
         id_producto = fila[0]
         nombre = fila[1]
-        precio = float(fila[2]) 
+        precio = float(fila[3]) 
         return f"producto: {nombre} - precio: {precio}" 
 
 def actualizar_producto(db):
@@ -134,28 +139,35 @@ def actualizar_producto(db):
         return
     
     cat_id = pedirCategoria(db)
-    precio = pedirDecimalPositivo("Ingrese el nuevo precio del producto: ")
+    precioCompra = pedirDecimalPositivo("Ingrese el nuevo precio de compra del producto: ")
+    precioVenta = pedirDecimalPositivo("Ingrese el nuevo precio de venta del producto: ")
+
     unidadMedida = pedirUnidadMedidad("Ingrese la nueva unidad de medida del producto: ")
 
-    query = "UPDATE PRODUCT SET Pro_Price=%s, Cat_ID=%s, Pro_UnitSize=%s WHERE Pro_Code=%s"
-    values = (precio, cat_id, unidadMedida, producto)  
+    query = "UPDATE PRODUCT SET Pro_PurchasePrice=%s, Pro_SalePrice=%s, Cat_ID=%s, Pro_UnitSize=%s WHERE Pro_Code=%s"
+    values = (precioCompra, precioVenta, cat_id, unidadMedida, producto)  
     conection.execute(query, values)
     db.commit()
     printActualizacionExitosa()
+        
 
 def eliminar_producto(db):
     consultar_productosSinInventario(db)
-    conection = db.cursor()
-    producto = pedirIdEntero("Ingrese el ID del producto a actualizar: ")
+    producto = pedirIdEntero("Ingrese el ID del producto a eliminar: ")
     if not validar_clave_foranea(db, "PRODUCT", "Pro_Code", producto):
         printMensajeErrorFK()
         return
     
-    query = "DELETE FROM PRODUCT WHERE Pro_Code=%s"
-    values = (producto, )      
-    conection.execute(query, values)
-    db.commit()
-    printEliminacionExitosa()
+    try: 
+        conection = db.cursor()
+        query = "DELETE FROM PRODUCT WHERE Pro_Code=%s"
+        values = (producto, )      
+        conection.execute(query, values)
+        db.commit()
+        printEliminacionExitosa()
+    except mysql.Error as e:
+        db.rollback()
+        print("No se pudo eliminar el producto porque hay compras o ventas asociadas a él.")
 
 def CRUD_CategoriaProductos(db):
     while True:
@@ -198,17 +210,20 @@ def actualizar_categoriaProducto(db):
 
 def eliminar_categoriaProducto(db):
     mostrarCategorias(db)
-    conection = db.cursor()
     categoria = pedirIdEntero("Ingrese el ID de la Categoría a eliminar: ")
     if not validar_clave_foranea(db, "CATEGORYPROD", "Cat_ID", categoria):
         printMensajeErrorFK()
         return
-    
-    query = "DELETE FROM CATEGORYPROD WHERE Cat_ID=%s"
-    values = (categoria, )      
-    conection.execute(query, values)
-    db.commit()
-    printEliminacionExitosa()
+    try: 
+        conection = db.cursor()
+        query = "DELETE FROM CATEGORYPROD WHERE Cat_ID=%s"
+        values = (categoria, )      
+        conection.execute(query, values)
+        db.commit()
+        printEliminacionExitosa()
+    except mysql.Error as e:
+        db.rollback()
+        print("No se pudo eliminar la categoría porque hay productos asociados a ella.")
 
 def menu_crud_productos(db):
     while True:

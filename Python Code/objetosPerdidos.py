@@ -5,6 +5,7 @@ from inputHelper import *
 from outputHelper import *
 from fechaHelper import *
 from zona import *
+from prettytable import PrettyTable
 
 def insert_object(db):
     conection = db.cursor()
@@ -34,14 +35,17 @@ def pedirZona(db):
 def consultar_objetos(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM LOSTOBJECT")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Fecha", "Descripción", "Zona"]
     datos = conection.fetchall()
     for fila in datos:
         id = fila[0]
         fecha = fila[1].strftime("%d/%m/%Y")
         descripcion = fila[2]
         zona = fila[3]
-        print(f"id: {id} - fecha: {fecha} - descripcion: {descripcion} - zonaId: {zona}")
-
+        tabla.add_row([id, fecha, descripcion, zona])
+    print(tabla)
+    
 def actualizar_objeto(db):
     consultar_objetos(db)
     conection = db.cursor()

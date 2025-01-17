@@ -2,6 +2,8 @@ import mensajes as msj
 from inputHelper import *
 from outputHelper import *
 from validadorFK import *
+from prettytable import PrettyTable
+import mysql.connector as mysql
 
 def insertar_proveedor(db):
     ruc = pedirRUC("RUC del proveedor: ")
@@ -19,13 +21,16 @@ def insertar_proveedor(db):
 def consultar_proveedores(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM SUPPLIER")
+    tabla = PrettyTable()
+    tabla.field_names = ["RUC", "Nombre", "Teléfono", "Correo"]
     datos = conection.fetchall()
     for fila in datos:
         cedula = fila[0]
         nombre = fila[1]
         celular = fila[2]
         correo = fila[3]
-        print(f"RUC: {cedula} - Nombre: {nombre} - Teléfono: {celular} - Correo: {correo}")
+        tabla.add_row([cedula, nombre, celular, correo])
+    print(tabla)
 
 def actualizar_proveedor(db):
     conection = db.cursor()
@@ -46,18 +51,22 @@ def actualizar_proveedor(db):
     printActualizacionExitosa()
 
 def eliminar_proveedor(db):
-    conection = db.cursor()
     ruc = pedirRUC("RUC del proveedor: ")
 
     query = "DELETE FROM SUPPLIER WHERE Sup_RUC=%s"
     values = (ruc,)
-            
-    conection.execute(query, values)
-    db.commit()
-    if conection.rowcount == 0:
-        printMensajeErrorFK()
-    else:
-        printEliminacionExitosa()
+
+    try:
+        conection = db.cursor()
+        conection.execute(query, values)
+        db.commit()
+        if conection.rowcount == 0:
+            printMensajeErrorFK()
+        else:
+            printEliminacionExitosa()
+    except mysql.Error as e:
+        db.rollback()
+        print("No se pudo eliminar el proveedor porque hay compras asociadas a él.")
 
 def menu_crud_proveedores(db):
     while True:

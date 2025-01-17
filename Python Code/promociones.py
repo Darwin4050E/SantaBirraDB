@@ -2,6 +2,7 @@ import mensajes as msj
 from inputHelper import *
 from outputHelper import *
 from validadorFK import *
+from prettytable import PrettyTable
 
 def insert_promociones(db):
     nombrePromocion = pedirNombreConSignos("Nombre de la promoción: ")
@@ -17,13 +18,16 @@ def insert_promociones(db):
 def consultar_promociones(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PROMOTION")
+    tabla = PrettyTable()
     datos = conection.fetchall()
+    tabla.field_names = ["ID", "Nombre", "Descuento"]
     for fila in datos:
         id = fila[0]
         nombre = fila[1]
         descuento = fila[2]
-        print(f"id: {id} - nombre: {nombre} - descuento: {descuento}")
-
+        tabla.add_row([id, nombre, descuento])
+    print(tabla)
+    
 def actualizar_promocion(db):
     consultar_promociones(db)
     conection = db.cursor()

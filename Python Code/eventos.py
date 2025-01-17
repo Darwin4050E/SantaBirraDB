@@ -4,6 +4,8 @@ from outputHelper import *
 from fechaHelper import *
 from validadorFK import *
 from prettytable import PrettyTable
+import mysql.connector as mysql
+
 
 def insertar_Evento(db):
     mostrarCategorias(db)
@@ -135,17 +137,21 @@ def actualizar_categoriasEve(db):
 
 def eliminar_cateogriasEve(db):
     mostrarCategorias(db)
-    conection = db.cursor()
     categoria = pedirIdEntero("Ingrese el ID de la Categoría a eliminar: ")
     if not validar_clave_foranea(db, "CATEGORYEVE", "Cat_ID", categoria):
         printMensajeErrorFK()
         return
     
-    query = "DELETE FROM CATEGORYEVE WHERE Cat_ID=%s"
-    values = (categoria, )      
-    conection.execute(query, values)
-    db.commit()
-    printEliminacionExitosa()
+    try: 
+        conection = db.cursor()
+        query = "DELETE FROM CATEGORYEVE WHERE Cat_ID=%s"
+        values = (categoria, )      
+        conection.execute(query, values)
+        db.commit()
+        printEliminacionExitosa()
+    except mysql.Error as e:
+        db.rollback()
+        print("No se pudo eliminar la categoría porque hay eventos asociados a ella.")
 
 
 def menu_crud_eventos(db):

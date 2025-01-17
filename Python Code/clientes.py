@@ -3,6 +3,8 @@ from validadorFK import *
 from inputHelper import *
 from outputHelper import *
 from prettytable import PrettyTable
+import mysql.connector as mysql
+
 
 def insertar_cliente(db):
     cedula = pedirCedula("Cédula: ")
@@ -72,18 +74,23 @@ def actualizar_cliente(db):
 
 def eliminar_cliente(db):
     consultar_clientesBasico(db)
-    conection = db.cursor()
     cedula = pedirCedula("Cédula: ")
 
-    query = "DELETE FROM CUSTOMER WHERE Cus_ID=%s"
-    values = (cedula,)
-            
-    conection.execute(query, values)
-    db.commit()
-    if conection.rowcount == 0:
-        printMensajeErrorFK()
-    else:
-        printEliminacionExitosa()
+    try: 
+        conection = db.cursor()
+        query = "DELETE FROM CUSTOMER WHERE Cus_ID=%s"
+        values = (cedula,)
+                
+        conection.execute(query, values)
+        db.commit()
+        if conection.rowcount == 0:
+            printMensajeErrorFK()
+        else:
+            printEliminacionExitosa()
+    except mysql.Error as e:
+        db.rollback()
+        print("No se pudo eliminar el cliente porque hay ventas o reservas asociadas a él.")
+    
 
 def menu_crud_clientes(db):
     while True:

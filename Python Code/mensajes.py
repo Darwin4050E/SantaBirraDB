@@ -149,7 +149,7 @@ opcionesReserva = """
     Seleccione una opción:
         1. Insertar Reserva.
         2. Consultar Reservas.
-        3. Consultar Reserva por ID.
+        3. Consultar Acompañantes en Reserva.
         4. Modificar Reserva.
         5. Eliminar Reserva.
         6. Volver.
@@ -229,7 +229,7 @@ opcionesObjetoPerdido = """
         1. Insertar Objeto.
         2. Consultar Objetos Perdidos.
         3. Modificar Objeto Perdido.
-        4. Eliminar Objeto.
+        4. Eliminar Objeto Perdido.
         5. Volver.
     ==========================================
 """

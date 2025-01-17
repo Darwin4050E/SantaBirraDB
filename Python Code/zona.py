@@ -3,6 +3,8 @@ from inputHelper import *
 from outputHelper import *
 from miembros import *
 from validadorFK import *
+from prettytable import PrettyTable
+
 
 def insertar_zona(db):
     conection = db.cursor()
@@ -30,6 +32,8 @@ def pedirGuardia(db):
 def consultar_zonas(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM ZONE")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID", "Capacidad", "Guardia", "Nombre", "Recargo VIP"]
     datos = conection.fetchall()
     for fila in datos:
         if fila[0] == 1:
@@ -38,14 +42,15 @@ def consultar_zonas(db):
             capacidad = fila[1]
             codGuardia = fila[2]
             nombre = fila[3]
-            print(f"id: {id_zona} - capacidad: {capacidad} - guardia: {codGuardia} - nombre: {nombre} - recargo VIP: {recargo}")
+            tabla.add_row([id_zona, capacidad, codGuardia, nombre, recargo])
         else:
             id_zona = fila[0]
             capacidad = fila[1]
             codGuardia = fila[2]
             nombre = fila[3]
-            print(f"id: {id_zona} - capacidad: {capacidad} - guardia: {codGuardia} - nombre: {nombre}")
-
+            tabla.add_row([id_zona, capacidad, codGuardia, nombre, "N/A"])
+    print(tabla)
+    
 def consultar_recargoVIP(db):
     conection = db.cursor()
     conection.execute("SELECT Charge_VIP FROM ZoneVIP WHERE Zon_ID=1")

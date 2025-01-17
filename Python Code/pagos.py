@@ -4,6 +4,7 @@ import mensajes as msj
 from inputHelper import *
 from outputHelper import *
 from fechaHelper import *
+from prettytable import PrettyTable
 
 def insert_pago(db):
     conection = db.cursor()
@@ -50,13 +51,16 @@ def consultar_pagos(db):
     conection = db.cursor()
     conection.execute("SELECT * FROM PAY ORDER BY Boo_ID, Pay_ID ASC")
     datos = conection.fetchall()
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Pago", "ID Reserva", "Fecha", "Monto"]
     for fila in datos:
         id = fila[0]
         reservaId = fila[1]
         fecha = fila[2].strftime("%d/%m/%Y")
         monto = fila[3]
-        print(f"id_Pago: {id} - Id Reserva: {reservaId} - fecha: {fecha} - monto: {monto}")
-
+        tabla.add_row([id, reservaId, fecha, monto])
+    print(tabla)
+    
 def actualizar_pago(db):
     consultar_pagos(db)
     conection = db.cursor()
