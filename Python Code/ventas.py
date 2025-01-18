@@ -10,22 +10,6 @@ from fechaHelper import *
 from miembros import *
 from prettytable import PrettyTable
 
-
-def restar(db, numero, productoo, cantidadess):
-        conection = db.cursor()
-        tupla1 = (numero, productoo, cantidadess)
-        query2 = "INSERT INTO PRODUCT_SALE (Sal_id, Pro_code, ProSale_Quantity) VALUES (%s, %s, %s)"
-        conection.execute(query2,tupla1)
-        db.commit()
-        inventario_id = inventario.obtener_ultimo_inventario(db, productoo)
-        nuevo_stock = inventario.consultar_inventario1(db, inventario_id, productoo) - int(cantidadess)
-        inventario.actualizarstock_inventario(db, inventario_id, productoo, nuevo_stock)
-
-def sumar(db, productoo, cantidadess):
-        inventario_id = inventario.obtener_ultimo_inventario(db, productoo)
-        nuevo_stock = inventario.consultar_inventario1(db, inventario_id, productoo) + int(cantidadess)
-        inventario.actualizarstock_inventario(db, inventario_id, productoo, nuevo_stock)
-
 def insertar_venta(db):
     conection = db.cursor()
     numero = pedirIdEntero("Número de la venta: ")
@@ -52,13 +36,11 @@ def insertar_venta(db):
 
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
 
-    tupla = (numero, fecha, miembro, cliente)
-    sql = "INSERT INTO SALE (Sal_id, Sal_Date, Mem_id, CUS_ID) VALUES (%s, %s, %s, %s)" 
-    conection.execute(sql,tupla)
+    conection.callproc('SP_VENTAS_INSERTAR', (numero,fecha, miembro, cliente))
     db.commit()
     for i in range(len(productoss)):
         productoo, cantidadess = productoss[i], cantidades[i]
-        restar(db, numero, productoo, cantidadess)
+        conection.callproc('SP_VENTASD_INSERTAR', (numero, productoo, cantidadess))
 
 def pedirVendedor(db):
     print("\nVendedores disponibles: ")
@@ -138,6 +120,7 @@ def consultar_ventas(db):
 
 def modificar_venta(db):
     consultar_ventas_sin(db)
+    conection = db.cursor()
     venta = pedirIdEntero("Ingrese el ID de la venta que desea modificar: ")
     if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
         printMensajeErrorFK()
@@ -158,7 +141,8 @@ def modificar_venta(db):
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
     for i in range(len(productoss)):
         productoo, cantidadess = productoss[i], cantidades[i]
-        restar(db, venta, productoo, cantidadess)
+        conection.callproc('SP_VENTASD_INSERTAR', (venta, productoo, cantidadess))
+        
 
 
 def eliminar_venta(db):
@@ -168,22 +152,19 @@ def eliminar_venta(db):
     if not validar_clave_foranea(db, "SALE", "Sal_ID", venta_id):
         printMensajeErrorFK()
         return
-    
-    values = (venta_id, )     
-    query2 = "DELETE FROM PRODUCT_SALE WHERE Sal_ID=%s"
-    dato1 , dato2 = consultar_venta(db, venta_id)
-    for i in range(len(dato1)):
-        sumar(db, dato1[i], dato2[i])
+    try:
+        print(venta_id)
+        productoss, cantidadess = consultar_venta(db, venta_id)
+        for i in range(len(productoss)):
+            conection.callproc('SP_VENTASD_ELIMINAR', (productoss[i], venta_id, cantidadess[i]))
+        conection.callproc('SP_VENTAS_ELIMINAR', (venta_id,))
+        db.commit()
+        print("\nVenta eliminada con éxito.")
+    except Exception as e:
+        print(e)
+    finally:
+        conection.close()
 
-
-    conection.execute(query2, values)
-    db.commit()
-    query = "DELETE FROM SALE WHERE Sal_ID=%s"
-    values = (venta_id, )     
-    conection.execute(query, values)
-    query2 = "DELETE FROM PRODUCT_SALE WHERE Sal_ID=%s"
-    conection.execute(query2, values)
-    db.commit()
 
 def menu_crud_ventas(db):
     while True:

@@ -446,3 +446,118 @@ BEGIN
     COMMIT;
 END //
 DELIMITER ;
+
+-- SP VENTAS
+DELIMITER //
+CREATE PROCEDURE SP_VENTAS_INSERTAR(
+IN IDVENTA INT, 
+IN VENTAFECHA DATE,
+IN idmiembro CHAR(10), 
+IN idcliente CHAR(10),
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+	BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: La venta no pudo ser insertada.';
+	END;
+    START TRANSACTION;
+		INSERT INTO SALE(Sal_id, Sal_Date, Mem_id, CUS_ID)
+		VALUES (IDVENTA, VENTAFECHA, idmiembro, idCliente);
+    COMMIT;
+END; //
+DELIMITER ;
+
+
+-- SP para actualización de ventas:
+
+DELIMITER //
+CREATE PROCEDURE SP_VENTAS_ACTUALIZARCANTIDAD(
+IN BillId INT, 
+IN SupRuc CHAR(13), 
+IN ProCode INT, 
+IN BillQuantity INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: La cantidad de producto comprada no pudo ser actualizada.';
+    END;
+    START TRANSACTION;
+		UPDATE Product_Supplier
+		SET Bill_Quantity = BillQuantity
+		WHERE Bill_ID = BillId AND Sup_Ruc = SupRuc AND Pro_Code = ProCode;
+    COMMIT;
+END; //
+DELIMITER ;
+
+-- SP para eliminación de VENTAS.
+
+DELIMITER //
+CREATE PROCEDURE SP_VENTAS_ELIMINAR(
+IN venta_id  INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: La Venta no pudo ser eliminada.';
+    END;
+    START TRANSACTION;
+		DELETE FROM SALE 
+        WHERE Sal_ID=venta_id;
+
+    COMMIT;
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE SP_VENTASD_ELIMINAR(
+    IN producto_id INT,
+IN venta_id  INT,
+IN cantidadd int
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: La Venta no pudo ser eliminada.';
+    END;
+    START TRANSACTION;
+        CALL SP_INVENTORY_RECUPERARID(producto_id, @Invid);
+        UPDATE Inventory
+        SET Inv_Stock = Inv_Stock + cantidadd
+        WHERE Inv_ID = @Invid AND Pro_Code = producto_id;
+        DELETE FROM PRODUCT_SALE WHERE Sal_ID=venta_id and Pro_Code = producto_id;
+
+    COMMIT;
+END; //
+DELIMITER ;
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE SP_VENTASD_INSERTAR(
+IN venta_id  INT,
+IN Pro_Codes INT, 
+IN cantidad INT
+)
+BEGIN
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+		ROLLBACK;
+		SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: El producto no puede añadirse a la venta.';
+    END;
+    START TRANSACTION;
+		INSERT INTO PRODUCT_SALE(Sal_id, Pro_Code, ProSale_Quantity)
+        VALUES (venta_id, Pro_Codes, cantidad);
+    COMMIT;
+END; //
+DELIMITER ;

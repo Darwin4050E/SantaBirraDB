@@ -71,3 +71,32 @@ BEGIN
     VALUES (1, new.Pro_Code, curdate(), 0);
 END //
 DELIMITER ;
+
+-- Trigger ventas
+
+DELIMITER //
+CREATE TRIGGER TRG_VENTAS_INSERT
+AFTER INSERT ON PRODUCT_SALE
+FOR EACH ROW
+BEGIN
+    CALL SP_INVENTORY_RECUPERARID(NEW.Pro_Code, @InvId);
+	UPDATE Inventory
+    SET Inv_Stock = Inv_Stock - NEW.ProSale_Quantity
+    WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+END; //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE TRIGGER TRG_VENTASD_ELIMINACION
+AFTER DELETE ON PRODUCT_SALE
+FOR EACH ROW
+BEGIN
+    CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @Invid);
+	UPDATE Inventory
+    SET Inv_Stock = Inv_Stock + OLD.ProSale_Quantity
+    WHERE Inv_ID = @Invid AND Pro_Code = OLD.Pro_Code;
+END;//
+DELIMITER ;
+
