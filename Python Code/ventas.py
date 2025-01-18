@@ -36,12 +36,21 @@ def insertar_venta(db):
 
         pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
 
+    
+    errores = 0
+    
     conection.callproc('SP_VENTAS_INSERTAR', (numero,fecha, miembro, cliente))
-    db.commit()
     for i in range(len(productoss)):
         productoo, cantidadess = productoss[i], cantidades[i]
-        conection.callproc('SP_VENTASD_INSERTAR', (numero, productoo, cantidadess))
-
+        try:
+           conection.callproc('SP_VENTASD_INSERTAR', (numero, productoo, cantidadess))
+        except Exception as e:
+            print(e)
+            errores += 1 
+    if errores == len(productoss):
+        conection.callproc('SP_VENTAS_ELIMINAR', (numero,))
+    db.commit()
+    
 def pedirVendedor(db):
     print("\nVendedores disponibles: ")
     consultar_empleadosPorRol(db, "SELLER")
