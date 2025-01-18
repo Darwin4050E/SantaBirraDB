@@ -1,4 +1,5 @@
 import mensajes as msj
+from prettytable import PrettyTable
 
 def reporteVentas(db):
     query = 'SELECT SUM(ProSale_Quantity * Pro_Price) FROM Product_Sale NATURAL JOIN Product'
@@ -14,14 +15,21 @@ def reporteVentas(db):
         cursor.close()
 
 def reporteGastosProveedor(db):
-    query = 'SELECT Sup_RUC, Sup_Name, Sup_Total FROM VW_COMPRAS_GASTOSPROVEEDOR'
+    query = 'SELECT Sup_RUC, Sup_Name, Sup_Total FROM V_COMPRAS_GASTOSPROVEEDOR'
     try:
         cursor = db.cursor()
         cursor.execute(query)
         datos = cursor.fetchall()
+        tabla = PrettyTable()
+        tabla.field_names = ["RUC", "Proveedor", "Gasto"]
         print("")
         for dato in datos:
-            print(f"RUC: {dato[0]} - Proveedor: {dato[1]} - Gasto: {dato[2]}")
+            ruc = dato[0]
+            Proveedor = dato[1]
+            Gasto = dato[2]
+            tabla.add_row([ruc, Proveedor, Gasto])
+        print(tabla)
+    
     except Exception as e:
         print(e)
     finally:

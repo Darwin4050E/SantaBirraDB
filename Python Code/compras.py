@@ -4,6 +4,7 @@ import proveedores as prv
 import productos as prd
 from inputHelper import *
 from fechaHelper import *
+from prettytable import PrettyTable
 import mysql.connector as mysql
 
 def mostrarCodigoCompra(db):
@@ -160,11 +161,16 @@ def consultarCompra(db):
     
     try:
         cursor = db.cursor()
+        tabla = PrettyTable()
+        tabla.field_names = ["Codigo Compra", "Ruc Proveedor","Fecha", "Codigo Producto", "Cantidad"]
         cursor.callproc('SP_COMPRAS_CONSULTAR', (codigoCompra, rucProveedor, codigoProducto))
         resultados = cursor.stored_results()
         for resultado in resultados:
             dato = resultado.fetchall()
-            print(f"\nFecha de la compra: {dato[0][0]} - Cantidad de producto comprada: {dato[0][1]}")
+            fecha = dato[0][0]
+            cantidad = dato[0][1]
+            tabla.add_row([codigoCompra, rucProveedor,fecha , codigoProducto, cantidad])
+        print(tabla)
     except Exception as e:
         print(e)
     finally:
