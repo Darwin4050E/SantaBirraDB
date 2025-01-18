@@ -248,6 +248,21 @@ def actualizar_reserva(db, reserva_id):
         else:
             print(msj.opcionesError)
 
+def consultar_reservas_con_pagoRequerido(db):
+    conection = db.cursor()
+    conection.execute("SELECT * FROM VW_REPORTE_RESERVAS")
+    tabla = PrettyTable()
+    tabla.field_names = ["ID Reserva", "Monto Entradas", "Ajuste Descuentos", "Pago Realizado"]
+    datos = conection.fetchall()
+    for fila in datos:
+        id_reserva = fila[0]
+        total = fila[1]
+        ajuste = fila[3]
+        pago = fila[4]
+
+        tabla.add_row([id_reserva, total, ajuste, pago])
+    print(tabla)
+
 def actualizar_fecha(conection,reserva_id,db):
     fecha = getFecha()
     try:
