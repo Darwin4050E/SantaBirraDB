@@ -14,7 +14,7 @@ def pedirNatural(mensaje):
 
 def pedirDecimalPositivo(mensaje):
     numero = input(mensaje)
-    while(not numero.replace(".","").isdigit() or float(numero) < 0):
+    while(not numero.replace(".","").isdigit() or float(numero) <= 0):
         print("Ingrese una entrada válida.")
         numero = input(mensaje)
     return float(numero)

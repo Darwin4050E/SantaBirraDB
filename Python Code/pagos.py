@@ -5,8 +5,10 @@ from inputHelper import *
 from outputHelper import *
 from fechaHelper import *
 from prettytable import PrettyTable
+from reserva import *
 
 def insert_pago(db):
+    consultar_reservas_con_pagoRequerido(db)
     conection = db.cursor()
     codReserva = pedirIdEntero("ID de la Reserva: ")
 
