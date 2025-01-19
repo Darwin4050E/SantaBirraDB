@@ -18,6 +18,8 @@ def reporteVentas(db):
             monto = dato[5]
             ganancias = dato[6]
             tabla.add_row([codigo, producto, medida, categoria, vendidos, monto, ganancias])
+        tabla.align["Monto Vendido"] = "r"  
+        tabla.align["Ganancias"] = "r" 
         print(tabla)
     except Exception as e:
         print(e)
@@ -120,14 +122,19 @@ def menu_crud_reportes(db):
         print(msj.opcionesReporte)
         opcion = int(input("Selecciona una opción [1-6]: "))
         if(opcion == 1):
+            print(msj.reporteVentas)
             reporteVentas(db)
         elif(opcion == 2):
+            print(msj.reporteInventarios)
             reporteInventario(db)
         elif(opcion == 3):
+            print(msj.reporteReservas)
             reporteReservas(db)
         elif(opcion == 4):
+            print(msj.reporteProveedor)
             reporteGastosProveedor(db)
         elif (opcion == 5):
+            print(msj.reporteIncidentes)
             reporteIncidentes(db)
         elif(opcion == 6):
             return

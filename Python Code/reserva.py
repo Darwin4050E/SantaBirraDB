@@ -38,7 +38,7 @@ def insertar_reserva(db):
         print(e)
 
     print()
-    nro_participantes = pedirEnteroPositivo("Ingrese la cantidad de acompañantes: ")
+    nro_participantes = pedirNatural("Ingrese la cantidad de acompañantes: ")
     if nro_participantes > 0:
         ids_acompanantes = lista_acompanantes(db, nro_participantes)
         registrar_acompanantes(ultimo_id, ids_acompanantes, db)
@@ -147,6 +147,12 @@ def registrar_acompanantes(id_reserva, ids_acompanantes, db):
             print(e)
     print("Acompañantes registrados con éxito.")
 
+def actualizar_acompañantes(reserva_id, db):
+    nro_participantes = pedirNatural("Ingrese la cantidad de acompañantes: ")
+    if nro_participantes > 0:
+        ids_acompanantes = lista_acompanantes(db, nro_participantes)
+        registrar_acompanantes(reserva_id, ids_acompanantes, db)
+
 def consultar_datos_reserva(db, reserva):
     conection = db.cursor()
     if not validar_clave_foranea(db, "BOOKING", "Boo_ID", reserva):
@@ -244,6 +250,8 @@ def actualizar_reserva(db, reserva_id):
         elif opcion == "5":
             actualizar_promocion(conection,reserva_id,db)
         elif opcion == "6":
+            actualizar_acompañantes(reserva_id,db)
+        elif opcion == "7":
             break
         else:
             print(msj.opcionesError)
