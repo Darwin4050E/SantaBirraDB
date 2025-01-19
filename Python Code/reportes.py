@@ -2,13 +2,23 @@ import mensajes as msj
 from prettytable import PrettyTable
 
 def reporteVentas(db):
-    query = 'SELECT SUM(ProSale_Quantity * Pro_Price) FROM Product_Sale NATURAL JOIN Product'
+    query = 'SELECT * FROM VW_REPORTE_VENTAS_PRODUCTOS'
     try:
         cursor = db.cursor()
         cursor.execute(query)
-        totalVentas = cursor.fetchall()
-        print(msj.reporteVentas)
-        print(f"Valor total en ventas de productos: ${totalVentas[0][0]}")
+        datos = cursor.fetchall()
+        tabla = PrettyTable()
+        tabla.field_names = ["Cod", "Nombre", "Medida", "Categoria", "Cant. Vendida", "Monto Vendido", "Ganancias"]
+        for dato in datos:
+            codigo = dato[0]
+            producto = dato[1]
+            medida = dato[2]
+            categoria = dato[3]
+            vendidos = dato[4]
+            monto = dato[5]
+            ganancias = dato[6]
+            tabla.add_row([codigo, producto, medida, categoria, vendidos, monto, ganancias])
+        print(tabla)
     except Exception as e:
         print(e)
     finally:
@@ -36,28 +46,70 @@ def reporteGastosProveedor(db):
         cursor.close()
 
 def reporteInventario(db):
-    query = 'SELECT Inv_ID, Pro_Code, Pro_Name, Pro_Price FROM Inventory NATURAL JOIN Product'
+    query = 'SELECT * FROM VW_REPORTE_MINIMAS_EXISTENCIAS'
     try:
         cursor = db.cursor()
         cursor.execute(query)
         datos = cursor.fetchall()
-        print(msj.reporteInventarios)
+        tabla = PrettyTable()
+        tabla.field_names = ["Cod", "Nombre", "Medida", "Categoria", "Stock", "F. Actualizacion", "RUC Prov.", "Proveedor"]
         for dato in datos:
-            print(f"Inventario: {dato[0]} - Código de producto: {dato[1]} - Producto: {dato[2]} - Cantidad: {dato[3]}")
+            codigo = dato[0]
+            producto = dato[1]
+            medida = dato[2]
+            categoria = dato[3]
+            existencias = dato[4]
+            fecha = dato[5].strftime("%d/%m/%Y")
+            ruc = dato[6]
+            proveedor = dato[7]
+            tabla.add_row([codigo, producto, medida, categoria, existencias, fecha, ruc, proveedor])
+        print(tabla)
     except Exception as e:
         print(e)
     finally:
         cursor.close()
         
-def reporteRendimientoEventos(db):
-    query = 'SELECT Eve_Name, COUNT(Boo_ID) as count_boo FROM Booking NATURAL JOIN Event GROUP BY Eve_Name ORDER BY count_boo DESC'
+def reporteReservas(db):
+    query = 'SELECT * FROM VW_REPORTE_RESERVAS_COMPLETADAS'
     try:
         cursor = db.cursor()
         cursor.execute(query)
         datos = cursor.fetchall()
-        print(msj.rendimientoEventos)
+        tabla = PrettyTable()
+        tabla.field_names = ["ID", "Fecha", "Evento", "Asistentes", "Entradas $", "Descuento $", "Promotor $", "Ajuste $", "Pago $"]
         for dato in datos:
-            print(f"Evento: {dato[0]} - Reserva: {dato[1]}")
+            id = dato[0]
+            fecha = dato[1]
+            evento = dato[3]
+            asistentes = dato[4]
+            entradas = dato[5]
+            descuento = dato[6]
+            comision = dato[7]
+            total = dato[8]
+            pago = dato[9]
+            tabla.add_row([id, fecha, evento, asistentes, entradas, descuento, comision, total, pago])
+        print(tabla)
+    except Exception as e:
+        print(e)
+    finally:
+        cursor.close()
+
+def reporteIncidentes(db):
+    query = 'SELECT * FROM VW_REPORTE_INCIDENTES_CLIENTE'
+    try:
+        cursor = db.cursor()
+        cursor.execute(query)
+        datos = cursor.fetchall()
+        tabla = PrettyTable()
+        tabla.field_names = ["Cedula", "Nombre", "Apellido", "Incidentes", "Ultimo Incidente"]
+        for dato in datos:
+            cedula = dato[0]
+            nombre = dato[1]
+            apellido = dato[2]
+            incidentes = dato[3]
+            ultimo = dato[4]
+            tabla.add_row([cedula, nombre, apellido, incidentes, ultimo])
+        print(tabla)
     except Exception as e:
         print(e)
     finally:
@@ -66,16 +118,18 @@ def reporteRendimientoEventos(db):
 def menu_crud_reportes(db):
     while(True):
         print(msj.opcionesReporte)
-        opcion = int(input("Selecciona una opción [1-5]: "))
+        opcion = int(input("Selecciona una opción [1-6]: "))
         if(opcion == 1):
             reporteVentas(db)
         elif(opcion == 2):
             reporteInventario(db)
         elif(opcion == 3):
-            reporteRendimientoEventos(db)
+            reporteReservas(db)
         elif(opcion == 4):
             reporteGastosProveedor(db)
-        elif(opcion == 5):
+        elif (opcion == 5):
+            reporteIncidentes(db)
+        elif(opcion == 6):
             return
         else:
             print(msj.opcionesError)

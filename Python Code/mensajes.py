@@ -123,9 +123,10 @@ opcionesReporte = """
     Seleccione una opción:
         1. Reporte de Ventas.
         2. Reporte de Inventario.
-        3. Reporte de Rendimiento de Eventos.
+        3. Reporte de Reservas Completadas.
         4. Reporte de Gastos por Proveedor.
-        5. Volver.
+        5. Reporte de Incidentes.
+        6. Volver.
     ==========================================
 """
 
