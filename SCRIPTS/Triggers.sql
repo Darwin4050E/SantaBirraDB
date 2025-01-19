@@ -38,7 +38,7 @@ BEGIN
 	CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
 	IF NEW.Bill_Quantity IS NOT NULL THEN
 		UPDATE Inventory
-		SET Inv_Stock = Inv_Stock + (NEW.Bill_Quantity - Inv_Stock), Inv_Date = curdate()
+		SET Inv_Stock = Inv_Stock + (NEW.Bill_Quantity - OLD.Bill_Quantity), Inv_Date = curdate()
 		WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
     ELSE
 		UPDATE Inventory
@@ -83,6 +83,20 @@ BEGIN
 	UPDATE Inventory
     SET Inv_Stock = Inv_Stock - NEW.ProSale_Quantity, Inv_Date = curdate()
     WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+END; //
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER TRG_VENTAS_AFTER_UPDATE
+AFTER UPDATE ON PRODUCT_SALE
+FOR EACH ROW
+BEGIN
+	CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
+	IF NEW.ProSale_Quantity IS NOT NULL THEN
+		UPDATE Inventory
+		SET Inv_Stock = Inv_Stock + (OLD.ProSale_Quantity - NEW.ProSale_Quantity), Inv_Date = curdate()
+		WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
+	END IF;
 END; //
 DELIMITER ;
 

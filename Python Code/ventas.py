@@ -134,24 +134,17 @@ def modificar_venta(db):
     if not validar_clave_foranea(db, "SALE", "Sal_ID", venta):
         printMensajeErrorFK()
         return
-    
-    productoss = []
-    cantidades = []
     dato1, dato2 = consultar_venta(db, venta)
-    dato1 = tuple(dato1)
-    productos.consultar_productos_ex(db, dato1)
-    pro_eleccion = ""
-    while pro_eleccion !="N":
-        ids, data = consultar_venta(db, venta)
-        producto = pedirProductoSinMostrar(db)
-        cantidad = pedirNatural("Cantidad: ")
-        productoss.append(producto)
-        cantidades.append(cantidad)
-        pro_eleccion = input("Ingrese N si desea terminar de añadir productos: ")
-    for i in range(len(productoss)):
-        productoo, cantidadess = productoss[i], cantidades[i]
-        conection.callproc('SP_VENTASD_INSERTAR', (venta, productoo, cantidadess))
-        
+    for i in range(len(dato1)):
+        id_p = dato1[i]
+        cantidad = dato2[i]
+        print(str(id_p) + " " + productos.consultar_producto(db, id_p) + " - cantidad:" + str(cantidad))
+    eleccion = pedirIdEntero("Ingresa el ID del producto al que deseas cambiar la cantidad: ")
+    eleccion2 = pedirIdEntero("Ingresa la cantidad a modificar: ")
+    try:
+        conection.callproc('SP_VENTAS_ACTUALIZARCANTIDAD', (venta,eleccion, eleccion2))
+    except Exception as e:
+        print(e)
 
 
 def eliminar_venta(db):

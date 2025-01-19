@@ -165,34 +165,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- SP para insertar inventario (Cuando se realiza conteo manual)
--- Las existencias se actualizan automáticamente cuando se realiza una compra o una venta.
-
-DELIMITER //
-CREATE PROCEDURE SP_INSERTAR_INVENTORY(IN codigoProducto INT, 
-IN fecha DATE, 
-IN stock INT)
-BEGIN
-	DECLARE ultimoInventario INT DEFAULT 1;
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
-		ROLLBACK;
-		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error: No se pudo agregar el inventario. Verifique e intente de nuevo.';
-    END;
-
-	START TRANSACTION;
-
-    CALL SP_ULTIMO_ID_INVENTARIO(codigoProducto, @idInventario);
-    SET ultimoInventario = (SELECT @idInventario);
-    
-	INSERT INTO INVENTORY (Inv_ID, Pro_Code, Inv_Date, Inv_Stock) 
-    VALUES (ultimoInventario, codigoProducto, fecha, stock);
-    
-    COMMIT;
-END //
-DELIMITER ;
-
 -- SP para obtener el último ID del inventario de un producto POR FECHA.
 
 DELIMITER //
@@ -474,22 +446,21 @@ DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE SP_VENTAS_ACTUALIZARCANTIDAD(
-IN BillId INT, 
-IN SupRuc CHAR(13), 
-IN ProCode INT, 
-IN BillQuantity INT
+IN venta_id INT, 
+IN producto_id INT, 
+IN newcantidad INT
 )
 BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
 		ROLLBACK;
 		SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error: La cantidad de producto comprada no pudo ser actualizada.';
+        SET MESSAGE_TEXT = 'Error: La cantidad de producto vendida no pudo ser actualizada.';
     END;
     START TRANSACTION;
-		UPDATE Product_Supplier
-		SET Bill_Quantity = BillQuantity
-		WHERE Bill_ID = BillId AND Sup_Ruc = SupRuc AND Pro_Code = ProCode;
+		UPDATE PRODUCT_SALE
+		SET ProSale_Quantity = newcantidad
+		WHERE Sal_id = venta_id AND Pro_Code = producto_id;
     COMMIT;
 END; //
 DELIMITER ;
