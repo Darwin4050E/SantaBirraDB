@@ -25,7 +25,7 @@ FOR EACH ROW
 BEGIN
     CALL SP_INVENTORY_RECUPERARID(NEW.Pro_Code, @InvId);
 	UPDATE Inventory
-    SET Inv_Stock = Inv_Stock + NEW.Bill_Quantity
+    SET Inv_Stock = Inv_Stock + NEW.Bill_Quantity, Inv_Date = curdate()
     WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
 END; //
 DELIMITER ;
@@ -38,7 +38,7 @@ BEGIN
 	CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
 	IF NEW.Bill_Quantity IS NOT NULL THEN
 		UPDATE Inventory
-		SET Inv_Stock = Inv_Stock + (NEW.Bill_Quantity - Inv_Stock)
+		SET Inv_Stock = Inv_Stock + (NEW.Bill_Quantity - Inv_Stock), Inv_Date = curdate()
 		WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
     ELSE
 		UPDATE Inventory
@@ -55,7 +55,7 @@ FOR EACH ROW
 BEGIN
     CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @InvId);
 	UPDATE Inventory
-    SET Inv_Stock = Inv_Stock - OLD.Bill_Quantity
+    SET Inv_Stock = Inv_Stock - OLD.Bill_Quantity, Inv_Date = curdate()
     WHERE Inv_ID = @InvID AND Pro_Code = OLD.Pro_Code;
 END; //
 DELIMITER ;
@@ -81,11 +81,10 @@ FOR EACH ROW
 BEGIN
     CALL SP_INVENTORY_RECUPERARID(NEW.Pro_Code, @InvId);
 	UPDATE Inventory
-    SET Inv_Stock = Inv_Stock - NEW.ProSale_Quantity
+    SET Inv_Stock = Inv_Stock - NEW.ProSale_Quantity, Inv_Date = curdate()
     WHERE Inv_ID = @InvID AND Pro_Code = NEW.Pro_Code;
 END; //
 DELIMITER ;
-
 
 
 DELIMITER //
@@ -95,8 +94,9 @@ FOR EACH ROW
 BEGIN
     CALL SP_INVENTORY_RECUPERARID(OLD.Pro_Code, @Invid);
 	UPDATE Inventory
-    SET Inv_Stock = Inv_Stock + OLD.ProSale_Quantity
+    SET Inv_Stock = Inv_Stock + OLD.ProSale_Quantity, Inv_Date = curdate()
     WHERE Inv_ID = @Invid AND Pro_Code = OLD.Pro_Code;
 END;//
 DELIMITER ;
+
 
