@@ -12,7 +12,9 @@ from prettytable import PrettyTable
 
 def insertar_venta(db):
     conection = db.cursor()
-    numero = pedirIdEntero("Número de la venta: ")
+    print("\nVentas realizadas: ")
+    consultar_ventas_sin(db)
+    numero = pedirIdEntero("Número de la venta actual: ")
     if validar_clave_foranea(db, "SALE", "Sal_ID", numero):
         printMensajeIngresoExistente()
         return
